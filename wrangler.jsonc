@@ -1,14 +1,5 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "miyazawa-workspace-site",
   "compatibility_date": "2026-05-12",
-  "observability": {
-    "enabled": true
-  },
-  "assets": {
-    "directory": "."
-  },
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
+  "pages_build_output_dir": "."
 }
