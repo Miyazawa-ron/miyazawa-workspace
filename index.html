@@ -108,14 +108,14 @@
     text-align:center;width:100%;display:block
   }
 
-  /* ── Card Grid ── */
+  /* ── Card Grid (flex for last-row centering) ── */
   .tool-grid{
     position:relative;z-index:1;
     max-width:1100px;margin:0 auto 60px;padding:0 24px;
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(280px,310px));
-    gap:16px;
-    justify-content:center
+    display:flex;flex-wrap:wrap;justify-content:center;gap:16px
+  }
+  .tool-grid > .tool-card{
+    width:310px;flex:0 0 310px
   }
 
   .tool-card{
@@ -210,9 +210,11 @@
     .search-wrap input{font-size:16px;padding:12px 16px 12px 42px}
     .search-icon{left:28px}
     .tool-grid{
-      grid-template-columns:1fr;
       gap:12px;padding:0 12px;
       margin-bottom:40px
+    }
+    .tool-grid > .tool-card{
+      width:100%;flex:0 0 100%
     }
     .tool-card{padding:18px}
     .card-icon{width:42px;height:42px;font-size:18px}
@@ -241,8 +243,10 @@
   /* ── Tablet mid-point ── */
   @media(min-width:641px) and (max-width:900px){
     .tool-grid{
-      grid-template-columns:repeat(auto-fit,minmax(260px,280px));
       gap:14px;padding:0 20px
+    }
+    .tool-grid > .tool-card{
+      width:280px;flex:0 0 280px
     }
   }
 
@@ -456,16 +460,16 @@
 
 <!-- ═══ Stack Info ═══ -->
 <div class="section-title" style="margin-top:-20px">⚙️ Stack</div>
-<div class="tool-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,240px));justify-content:center">
-  <div class="tool-card" style="padding:16px 20px">
+<div class="tool-grid" style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px">
+  <div class="tool-card" style="width:240px;flex:0 0 240px;padding:16px 20px">
     <div class="card-title" style="font-size:14px">Deployed on</div>
     <div class="card-desc" style="margin-top:4px">Cloudflare Pages</div>
   </div>
-  <div class="tool-card" style="padding:16px 20px">
+  <div class="tool-card" style="width:240px;flex:0 0 240px;padding:16px 20px">
     <div class="card-title" style="font-size:14px">Domain</div>
     <div class="card-desc" style="margin-top:4px">miyazawa-workspace.com</div>
   </div>
-  <div class="tool-card" style="padding:16px 20px">
+  <div class="tool-card" style="width:240px;flex:0 0 240px;padding:16px 20px">
     <div class="card-title" style="font-size:14px">Built with</div>
     <div class="card-desc" style="margin-top:4px">Pure HTML / CSS / JS</div>
   </div>
