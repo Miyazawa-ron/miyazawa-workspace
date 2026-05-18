@@ -194,6 +194,7 @@ body::after {
 }
 .cit-time .sep { color: var(--orange); animation: blink 1s step-end infinite; }
 .cit-date { font-size: 9px; color: var(--dim); margin-top: 3px; letter-spacing: 2px; }
+.cit-wd-s { font-size: 8px; color: var(--orange); opacity: .7; margin-top: 1px; letter-spacing: 2px; }
 .cit-tz   { font-size: 8px; color: var(--dim2); margin-top: 2px; letter-spacing: 2px; }
 
 /* ════════════════════════════════
@@ -263,7 +264,8 @@ body::after {
     <div>
       <div class="cit-city">北 京 · BEIJING</div>
       <div class="cit-time" id="t-bj">--<span class="sep">:</span>--<span class="sep">:</span>--</div>
-      <div class="cit-date" id="d-bj">----年--月--日 &nbsp; <span id="w-bj"></span></div>
+      <div class="cit-date" id="d-bj">----年--月--日</div>
+      <div class="cit-wd-s" id="w-bj"></div>
       <div class="cit-tz">UTC+8 · CST · 中国标准时间</div>
     </div>
   </div>
@@ -272,7 +274,8 @@ body::after {
     <div>
       <div class="cit-city">纽 约 · NEW YORK</div>
       <div class="cit-time" id="t-ny">--<span class="sep">:</span>--<span class="sep">:</span>--</div>
-      <div class="cit-date" id="d-ny">----年--月--日 &nbsp; <span id="w-ny"></span></div>
+      <div class="cit-date" id="d-ny">----年--月--日</div>
+      <div class="cit-wd-s" id="w-ny"></div>
       <div class="cit-tz">UTC-5/-4 · EST/EDT · 美东时间</div>
     </div>
   </div>
