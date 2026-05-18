@@ -80,7 +80,7 @@ body::after {
 }
 
 .tok-header {
-  font-size: 13px; color: var(--dim);
+  font-size: 16px; color: var(--dim);
   letter-spacing: 6px; margin-bottom: 12px;
 }
 .tok-flag { font-size: 18px; margin-right: 6px; }
@@ -102,20 +102,20 @@ body::after {
 @keyframes blink { 50% { opacity: 0.1; } }
 
 .tok-date {
-  font-size: clamp(13px, 1.8vw, 24px);
+  font-size: clamp(16px, 2.2vw, 30px);
   color: var(--dim);
   letter-spacing: 4px;
   margin-top: 18px;
 }
 .tok-wd {
-  font-size: clamp(12px, 1.4vw, 20px);
+  font-size: clamp(15px, 1.8vw, 24px);
   color: var(--orange);
   opacity: .75;
   margin-top: 6px;
   letter-spacing: 4px;
 }
 .tok-tz {
-  font-size: 10px; color: var(--dim2);
+  font-size: 13px; color: var(--dim2);
   letter-spacing: 4px; margin-top: 10px;
 }
 
@@ -131,39 +131,39 @@ body::after {
 }
 
 .wth-loc {
-  font-size: 9px; color: var(--dim);
-  letter-spacing: 5px; margin-bottom: 10px;
+  font-size: 13px; color: var(--dim);
+  letter-spacing: 4px; margin-bottom: 10px;
 }
 .wth-row {
   display: flex; align-items: center; gap: 0;
 }
 
 .wth-left { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
-.wth-icon { font-size: min(6vw, 14vh); line-height: 1; }
+.wth-icon { font-size: min(7vw, 16vh); line-height: 1; }
 
 .wth-temp {
   font-family: 'Orbitron', sans-serif;
-  font-size: min(7vw, 17vh);
+  font-size: min(8vw, 19vh);
   font-weight: 900; color: var(--orange);
   text-shadow: 0 0 20px var(--og);
   line-height: 1;
 }
 .wth-deg { font-size: 0.45em; opacity: .65; vertical-align: super; }
-.wth-desc { font-size: clamp(13px, 1.6vw, 22px); color: var(--white); margin-top: 6px; }
-.wth-feel { font-size: clamp(10px, 1.1vw, 16px); color: var(--dim); margin-top: 4px; }
+.wth-desc { font-size: clamp(16px, 2vw, 26px); color: var(--white); margin-top: 6px; }
+.wth-feel { font-size: clamp(14px, 1.5vw, 20px); color: var(--dim); margin-top: 4px; }
 
 .wth-vline { width: 1px; height: min(8vw, 18vh); background: var(--line); margin: 0 32px; flex-shrink: 0; }
 
 .wth-stats { display: flex; gap: 32px; }
-.wth-stat-lbl { font-size: 9px; color: var(--dim); letter-spacing: 4px; margin-bottom: 6px; }
+.wth-stat-lbl { font-size: 13px; color: var(--dim); letter-spacing: 3px; margin-bottom: 6px; }
 .wth-stat-val {
   font-family: 'Orbitron', sans-serif;
-  font-size: clamp(18px, 2.5vw, 36px); font-weight: 700;
+  font-size: clamp(22px, 3vw, 42px); font-weight: 700;
   color: var(--blue);
 }
-.wth-stat-unit { font-size: 12px; color: var(--dim); margin-left: 2px; }
+.wth-stat-unit { font-size: 15px; color: var(--dim); margin-left: 2px; }
 
-.wth-updated { margin-left: auto; font-size: 9px; color: var(--dim2); letter-spacing: 1px; align-self: flex-end; }
+.wth-updated { margin-left: auto; font-size: 12px; color: var(--dim2); letter-spacing: 1px; align-self: flex-end; }
 .wth-msg { font-size: 12px; color: var(--dim); letter-spacing: 3px; }
 
 /* ════════════════════════════════
@@ -185,17 +185,17 @@ body::after {
 }
 .cit-card:first-child { border-right: 1px solid var(--line); }
 
-.cit-flag { font-size: clamp(14px, 1.6vw, 22px); flex-shrink: 0; }
-.cit-city { font-size: 9px; color: var(--dim); letter-spacing: 4px; margin-bottom: 3px; }
+.cit-flag { font-size: clamp(16px, 2vw, 26px); flex-shrink: 0; }
+.cit-city { font-size: 13px; color: var(--dim); letter-spacing: 4px; margin-bottom: 3px; }
 .cit-time {
   font-family: 'Orbitron', sans-serif;
-  font-size: clamp(18px, 2.8vw, 38px); font-weight: 700;
+  font-size: clamp(20px, 3vw, 42px); font-weight: 700;
   color: var(--white); line-height: 1;
 }
 .cit-time .sep { color: var(--orange); animation: blink 1s step-end infinite; }
-.cit-date { font-size: 9px; color: var(--dim); margin-top: 3px; letter-spacing: 2px; }
-.cit-wd-s { font-size: 8px; color: var(--orange); opacity: .7; margin-top: 1px; letter-spacing: 2px; }
-.cit-tz   { font-size: 8px; color: var(--dim2); margin-top: 2px; letter-spacing: 2px; }
+.cit-date { font-size: 13px; color: var(--dim); margin-top: 3px; letter-spacing: 2px; }
+.cit-wd-s { font-size: 12px; color: var(--orange); opacity: .7; margin-top: 1px; letter-spacing: 2px; }
+.cit-tz   { font-size: 12px; color: var(--dim2); margin-top: 2px; letter-spacing: 2px; }
 
 /* ════════════════════════════════
    RATES — 10%
@@ -218,18 +218,18 @@ body::after {
   display: flex; flex-direction: column; justify-content: center;
 }
 .rat-pair {
-  font-size: 8px; color: var(--dim);
+  font-size: 12px; color: var(--dim);
   letter-spacing: 2px; margin-bottom: 3px;
 }
 .rat-val {
   font-family: 'Orbitron', sans-serif;
-  font-size: clamp(12px, 1.5vw, 20px); font-weight: 700;
+  font-size: clamp(14px, 1.6vw, 22px); font-weight: 700;
   color: var(--orange);
 }
-.rat-note { font-size: 7px; color: var(--dim2); margin-top: 2px; }
+.rat-note { font-size: 11px; color: var(--dim2); margin-top: 2px; }
 
 .rat-foot {
-  font-size: 8px; color: var(--dim2);
+  font-size: 11px; color: var(--dim2);
   letter-spacing: 2px; text-align: center;
   margin-top: 5px;
 }
