@@ -1,497 +1,461 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Miyazawa Workspace</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WORLD TERMINAL</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-  /* ── Reset & Base ── */
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth;font-size:16px}
-  body{
-    font-family:-apple-system,'Segoe UI','Helvetica Neue',Arial,'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans CJK JP',sans-serif;
-    background:#0a0a0f;
-    color:#e4e4e7;
-    min-height:100vh;
-    line-height:1.5
-  }
-  a{text-decoration:none;color:inherit}
-  img{display:block;max-width:100%}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* ── Background Effects ── */
-  .bg-grid{
-    position:fixed;inset:0;
-    background-image:
-      linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
-    background-size:60px 60px;
-    pointer-events:none;z-index:0
-  }
-  .bg-glow{
-    position:fixed;top:-30vh;right:-20vh;width:80vh;height:80vh;
-    background:radial-gradient(circle,rgba(120,50,255,.12),transparent 70%);
-    pointer-events:none;z-index:0
-  }
-  .bg-glow-2{
-    position:fixed;bottom:-30vh;left:-20vh;width:80vh;height:80vh;
-    background:radial-gradient(circle,rgba(255,80,80,.08),transparent 70%);
-    pointer-events:none;z-index:0
-  }
+:root {
+  --bg:     #1a1a1a;
+  --panel:  #222222;
+  --line:   #2c2c2c;
+  --orange: #E86020;
+  --og:     rgba(232,96,32,0.5);
+  --white:  #d2d2d2;
+  --dim:    #555555;
+  --dim2:   #3a3a3a;
+  --blue:   #7aaacc;
+}
 
-  /* ── Header / Logo ── */
-  header{
-    position:relative;z-index:1;
-    padding:100px 24px 40px;text-align:center
-  }
-  .logo-link{
-    display:inline-block;margin:0 auto 24px;
-    text-decoration:none
-  }
-  .logo-img{
-    width:80px;height:80px;border-radius:50%;object-fit:cover;
-    display:block;margin:0 auto;
-    box-shadow:0 0 40px rgba(124,58,237,.3);
-    transition:transform .3s ease,box-shadow .3s ease
-  }
-  .logo-img:hover{
-    transform:scale(1.05);
-    box-shadow:0 0 60px rgba(124,58,237,.5)
-  }
-  header h1{
-    font-size:40px;font-weight:800;letter-spacing:-1px;
-    background:linear-gradient(135deg,#fff 30%,#a78bfa);
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    background-clip:text
-  }
-  header p{
-    margin-top:12px;font-size:18px;color:#a1a1aa;
-    max-width:480px;margin-left:auto;margin-right:auto
-  }
-  .header-badges{
-    margin-top:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap
-  }
-  .badge{
-    padding:4px 14px;border-radius:999px;font-size:12px;font-weight:600;
-    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
-    color:#a1a1aa
-  }
+html, body { height: 100%; overflow: hidden; }
 
-  /* ── Search Bar ── */
-  .search-wrap{
-    position:relative;z-index:1;
-    max-width:480px;margin:0 auto 48px;padding:0 24px
-  }
-  .search-wrap input{
-    width:100%;padding:14px 20px 14px 48px;
-    border-radius:12px;border:1px solid rgba(255,255,255,.08);
-    background:rgba(255,255,255,.04);
-    color:#e4e4e7;font-size:16px;outline:none;
-    transition:all .25s
-  }
-  .search-wrap input::placeholder{color:#52525b}
-  .search-wrap input:focus{
-    border-color:rgba(124,58,237,.4);
-    background:rgba(255,255,255,.06);
-    box-shadow:0 0 20px rgba(124,58,237,.1)
-  }
-  .search-icon{
-    position:absolute;left:38px;top:50%;transform:translateY(-50%);
-    color:#52525b;font-size:18px;pointer-events:none
-  }
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Share Tech Mono', monospace;
+  display: flex;
+  flex-direction: column;
+}
 
-  /* ── Section Title ── */
-  .section-title{
-    position:relative;z-index:1;
-    max-width:1100px;margin:0 auto 20px;padding:0 32px;
-    font-size:13px;font-weight:700;letter-spacing:2px;
-    text-transform:uppercase;color:#52525b;
-    text-align:center;width:100%;display:block
-  }
+/* scanlines - very subtle */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
 
-  /* ── Card Grid (flex for last-row centering) ── */
-  .tool-grid{
-    position:relative;z-index:1;
-    max-width:1100px;margin:0 auto 60px;padding:0 24px;
-    display:flex;flex-wrap:wrap;justify-content:center;gap:16px
-  }
-  .tool-grid > .tool-card{
-    width:310px;flex:0 0 310px
-  }
+/* Fullscreen button */
+.fs-btn {
+  position: fixed; top: 14px; right: 16px; z-index: 1000;
+  background: transparent;
+  border: 1px solid var(--dim2);
+  color: var(--dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; padding: 4px 10px;
+  cursor: pointer; letter-spacing: 2px;
+  transition: all .2s;
+}
+.fs-btn:hover { border-color: var(--orange); color: var(--orange); }
 
-  .tool-card{
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:16px;padding:24px;
-    transition:all .3s cubic-bezier(.4,0,.2,1);
-    cursor:pointer;position:relative;overflow:hidden;
-    text-align:center
-  }
-  .tool-card::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(135deg,rgba(124,58,237,.05),transparent 60%);
-    opacity:0;transition:opacity .3s
-  }
-  .tool-card:hover{
-    background:rgba(255,255,255,.07);
-    border-color:rgba(255,255,255,.1);
-    transform:translateY(-3px);
-    box-shadow:0 12px 40px rgba(0,0,0,.3)
-  }
-  .tool-card:hover::before{opacity:1}
-  .tool-card:active{transform:translateY(-1px)}
+/* ════════════════════════════════
+   TOKYO — 50%
+   ════════════════════════════════ */
+.tok {
+  flex: 5;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  padding: 16px 20px;
+  position: relative;
+  overflow: hidden;
+}
 
-  .card-top{
-    display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;z-index:1
-  }
-  .card-icon{
-    width:48px;height:48px;border-radius:12px;
-    display:flex;align-items:center;justify-content:center;
-    font-size:22px;flex-shrink:0;
-    background:rgba(255,255,255,.06)
-  }
-  .card-icon.local{background:rgba(59,130,246,.15);color:#60a5fa}
-  .card-icon.web{background:rgba(124,58,237,.15);color:#a78bfa}
-  .card-icon.git{background:rgba(34,197,94,.15);color:#4ade80}
-  .card-icon.ai{background:rgba(239,68,68,.15);color:#f87171}
-  .card-icon.design{background:rgba(251,146,60,.15);color:#fb923c}
-  .card-icon.tool{background:rgba(168,85,247,.15);color:#c084fc}
+/* faint watermark */
+.tok::before {
+  content: 'JST';
+  position: absolute; right: -20px; bottom: -30px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 180px; font-weight: 900;
+  color: rgba(255,255,255,0.018);
+  pointer-events: none; user-select: none;
+}
 
-  .card-info{min-width:0}
-  .card-title{
-    font-size:17px;font-weight:700;color:#f4f4f5;
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    text-align:center
-  }
-  .card-status{
-    font-size:10px;padding:2px 8px;border-radius:999px;
-    font-weight:600;letter-spacing:.3px;white-space:nowrap
-  }
-  .card-status.online{background:rgba(34,197,94,.15);color:#4ade80}
-  .card-status.local{background:rgba(59,130,246,.15);color:#60a5fa}
-  .card-status.migrating{background:rgba(251,146,60,.15);color:#fb923c}
+.tok-header {
+  font-size: 13px; color: var(--dim);
+  letter-spacing: 6px; margin-bottom: 12px;
+}
+.tok-flag { font-size: 18px; margin-right: 6px; }
 
-  .card-desc{
-    margin-top:0;font-size:13px;color:#71717a;line-height:1.5;
-    text-align:center
-  }
-  .card-tags{
-    margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;
-    justify-content:center
-  }
-  .card-tag{
-    font-size:11px;padding:2px 10px;border-radius:999px;
-    background:rgba(255,255,255,.04);
-    color:#52525b;border:1px solid rgba(255,255,255,.04)
-  }
+.tok-time {
+  font-family: 'Orbitron', sans-serif;
+  font-size: min(14.5vw, 30vh);
+  font-weight: 900;
+  color: #e0e0e0;
+  text-shadow: 0 0 60px rgba(220,220,220,0.12);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.tok-time .sep {
+  color: var(--orange);
+  text-shadow: 0 0 16px var(--og);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0.1; } }
 
-  .card-link{
-    position:absolute;inset:0;z-index:2;
-    border-radius:16px
-  }
+.tok-date {
+  font-size: clamp(13px, 1.8vw, 24px);
+  color: var(--dim);
+  letter-spacing: 4px;
+  margin-top: 18px;
+}
+.tok-wd {
+  font-size: clamp(12px, 1.4vw, 20px);
+  color: var(--orange);
+  opacity: .75;
+  margin-top: 6px;
+  letter-spacing: 4px;
+}
+.tok-tz {
+  font-size: 10px; color: var(--dim2);
+  letter-spacing: 4px; margin-top: 10px;
+}
 
-  /* ── Footer ── */
-  footer{
-    position:relative;z-index:1;
-    text-align:center;padding:40px 24px 60px;
-    color:#3f3f46;font-size:13px
-  }
-  footer a{color:#71717a;transition:color .2s}
-  footer a:hover{color:#a78bfa}
+/* ════════════════════════════════
+   WEATHER — 30%
+   ════════════════════════════════ */
+.wth {
+  flex: 3;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 30px;
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
 
-  /* ── Responsive ── */
-  @media(max-width:640px){
-    html{font-size:15px}
-    header{padding:60px 16px 28px}
-    .logo-img{width:64px;height:64px}
-    header h1{font-size:28px}
-    header p{font-size:15px;margin-top:10px}
-    .header-badges{margin-top:16px;gap:6px}
-    .search-wrap{margin-bottom:32px;padding:0 16px}
-    .search-wrap input{font-size:16px;padding:12px 16px 12px 42px}
-    .search-icon{left:28px}
-    .tool-grid{
-      gap:12px;padding:0 12px;
-      margin-bottom:40px
-    }
-    .tool-grid > .tool-card{
-      width:100%;flex:0 0 100%
-    }
-    .tool-card{padding:18px}
-    .card-icon{width:42px;height:42px;font-size:18px}
-    .card-title{font-size:16px}
-    .card-desc{font-size:13px}
-    .section-title{
-      padding:0 16px;margin-bottom:14px;
-      font-size:12px
-    }
-    .section-title:not(.grid-embedded){
-      margin-left:auto;margin-right:auto
-    }
-    footer{padding:30px 16px 48px}
-  }
+.wth-loc {
+  font-size: 9px; color: var(--dim);
+  letter-spacing: 5px; margin-bottom: 10px;
+}
+.wth-row {
+  display: flex; align-items: center; gap: 0;
+}
 
-  /* ── Small phones ── */
-  @media(max-width:380px){
-    header{padding:40px 12px 24px}
-    header h1{font-size:24px}
-    .tool-grid{padding:0 8px;gap:10px}
-    .tool-card{padding:14px}
-    .card-top{gap:10px}
-    .card-icon{width:36px;height:36px;font-size:16px}
-  }
+.wth-left { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.wth-icon { font-size: min(6vw, 14vh); line-height: 1; }
 
-  /* ── Tablet mid-point ── */
-  @media(min-width:641px) and (max-width:900px){
-    .tool-grid{
-      gap:14px;padding:0 20px
-    }
-    .tool-grid > .tool-card{
-      width:280px;flex:0 0 280px
-    }
-  }
+.wth-temp {
+  font-family: 'Orbitron', sans-serif;
+  font-size: min(7vw, 17vh);
+  font-weight: 900; color: var(--orange);
+  text-shadow: 0 0 20px var(--og);
+  line-height: 1;
+}
+.wth-deg { font-size: 0.45em; opacity: .65; vertical-align: super; }
+.wth-desc { font-size: clamp(13px, 1.6vw, 22px); color: var(--white); margin-top: 6px; }
+.wth-feel { font-size: clamp(10px, 1.1vw, 16px); color: var(--dim); margin-top: 4px; }
 
-  /* ── Prevent iOS zoom on input ── */
-  @supports(-webkit-touch-callout:none){
-    .search-wrap input{font-size:16px!important}
-  }
+.wth-vline { width: 1px; height: min(8vw, 18vh); background: var(--line); margin: 0 32px; flex-shrink: 0; }
+
+.wth-stats { display: flex; gap: 32px; }
+.wth-stat-lbl { font-size: 9px; color: var(--dim); letter-spacing: 4px; margin-bottom: 6px; }
+.wth-stat-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(18px, 2.5vw, 36px); font-weight: 700;
+  color: var(--blue);
+}
+.wth-stat-unit { font-size: 12px; color: var(--dim); margin-left: 2px; }
+
+.wth-updated { margin-left: auto; font-size: 9px; color: var(--dim2); letter-spacing: 1px; align-self: flex-end; }
+.wth-msg { font-size: 12px; color: var(--dim); letter-spacing: 3px; }
+
+/* ════════════════════════════════
+   OTHER CITIES — 10%
+   ════════════════════════════════ */
+.cit {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  border-bottom: 1px solid var(--line);
+  gap: 0;
+  overflow: hidden;
+}
+
+.cit-card {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  padding: 0 20px;
+  text-align: left;
+}
+.cit-card:first-child { border-right: 1px solid var(--line); }
+
+.cit-flag { font-size: clamp(14px, 1.6vw, 22px); flex-shrink: 0; }
+.cit-city { font-size: 9px; color: var(--dim); letter-spacing: 4px; margin-bottom: 3px; }
+.cit-time {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(18px, 2.8vw, 38px); font-weight: 700;
+  color: var(--white); line-height: 1;
+}
+.cit-time .sep { color: var(--orange); animation: blink 1s step-end infinite; }
+.cit-date { font-size: 9px; color: var(--dim); margin-top: 3px; letter-spacing: 2px; }
+.cit-tz   { font-size: 8px; color: var(--dim2); margin-top: 2px; letter-spacing: 2px; }
+
+/* ════════════════════════════════
+   RATES — 10%
+   ════════════════════════════════ */
+.rat {
+  flex: 1;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 14px;
+  overflow: hidden;
+}
+
+.rat-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
+}
+
+.rat-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 5px 10px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.rat-pair {
+  font-size: 8px; color: var(--dim);
+  letter-spacing: 2px; margin-bottom: 3px;
+}
+.rat-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(12px, 1.5vw, 20px); font-weight: 700;
+  color: var(--orange);
+}
+.rat-note { font-size: 7px; color: var(--dim2); margin-top: 2px; }
+
+.rat-foot {
+  font-size: 8px; color: var(--dim2);
+  letter-spacing: 2px; text-align: center;
+  margin-top: 5px;
+}
 </style>
 </head>
 <body>
 
-<div class="bg-grid"></div>
-<div class="bg-glow"></div>
-<div class="bg-glow-2"></div>
+<button class="fs-btn" onclick="toggleFullscreen()">⛶ FULLSCREEN</button>
 
-<!-- ═══ Header ═══ -->
-<header>
-  <a class="logo-link" href="https://www.miyazawa-workspace.com">
-    <img class="logo-img" src="logo-thumb.jpg" alt="Miyazawa Workspace" width="80" height="80">
-  </a>
-  <h1>Miyazawa Workspace</h1>
-  <p>Personal toolkit &amp; project hub — everything I build and use, in one place.</p>
-  <div class="header-badges">
-    <span class="badge">✦ AI Agent</span>
-    <span class="badge">✦ Design</span>
-    <span class="badge">✦ Dev</span>
+<!-- ── TOKYO 50% ── -->
+<section class="tok">
+  <div class="tok-header">
+    <span class="tok-flag">🇯🇵</span>東 京 · T O K Y O
   </div>
-</header>
+  <div class="tok-time" id="t-tk">
+    --<span class="sep">:</span>--<span class="sep">:</span>--
+  </div>
+  <div class="tok-date" id="d-tk">----年--月--日</div>
+  <div class="tok-wd"   id="w-tk">---</div>
+  <div class="tok-tz">UTC +9 · JST · 日本標準時</div>
+</section>
 
-<!-- ═══ Search ═══ -->
-<div class="search-wrap">
-  <span class="search-icon">⌕</span>
-  <input type="text" id="search" placeholder="Search tools & projects..." oninput="filterCards()">
-</div>
+<!-- ── WEATHER 30% ── -->
+<section class="wth">
+  <div id="wth-wrap"><div class="wth-msg">◌ Loading weather...</div></div>
+</section>
 
-<!-- ═══ Web Projects ═══ -->
-<div class="section-title">🌐 Web Projects</div>
-<div class="tool-grid">
-  <div class="tool-card" data-tags="sunrise design company hinode okinawa">
-    <a class="card-link" href="https://hinodec.com" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon web">日</div>
-      <div class="card-info">
-        <div class="card-title">
-          日の出 株式会社 / SUNRISE
-          <span class="card-status online">Live</span>
-        </div>
-        <div class="card-desc">Design company &amp; guesthouse business — branding, VI, book design, packaging, and a traditional Okinawan guesthouse.</div>
-        <div class="card-tags">
-          <span class="card-tag">Design</span>
-          <span class="card-tag">民宿</span>
-          <span class="card-tag">Cloudflare</span>
-        </div>
-      </div>
+<!-- ── OTHER CITIES 10% ── -->
+<section class="cit">
+  <div class="cit-card">
+    <div class="cit-flag">🇨🇳</div>
+    <div>
+      <div class="cit-city">北 京 · BEIJING</div>
+      <div class="cit-time" id="t-bj">--<span class="sep">:</span>--<span class="sep">:</span>--</div>
+      <div class="cit-date" id="d-bj">----年--月--日 &nbsp; <span id="w-bj"></span></div>
+      <div class="cit-tz">UTC+8 · CST · 中国标准时间</div>
     </div>
   </div>
-
-  <div class="tool-card" data-tags="sakura skylife okinawa">
-    <a class="card-link" href="https://skylife-sakura.com" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon web">桜</div>
-      <div class="card-info">
-        <div class="card-title">
-          Skylife Sakura
-          <span class="card-status online">Live</span>
-        </div>
-        <div class="card-desc">Okinawa-based service website — design portfolio, guesthouse gallery, and business consulting.</div>
-        <div class="card-tags">
-          <span class="card-tag">Okinawa</span>
-          <span class="card-tag">Portfolio</span>
-        </div>
-      </div>
+  <div class="cit-card">
+    <div class="cit-flag">🇺🇸</div>
+    <div>
+      <div class="cit-city">纽 约 · NEW YORK</div>
+      <div class="cit-time" id="t-ny">--<span class="sep">:</span>--<span class="sep">:</span>--</div>
+      <div class="cit-date" id="d-ny">----年--月--日 &nbsp; <span id="w-ny"></span></div>
+      <div class="cit-tz">UTC-5/-4 · EST/EDT · 美东时间</div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ═══ Local Services ═══ -->
-<div class="section-title" style="margin-top:-4px">🖥️ Local Services</div>
-<div class="tool-grid">
-  <div class="tool-card" data-tags="hermes ai chat webui agent">
-    <a class="card-link" href="http://localhost:8787" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon ai">H</div>
-      <div class="card-info">
-        <div class="card-title">
-          Hermes WebUI
-          <span class="card-status local">Local</span>
-        </div>
-        <div class="card-desc">AI chat interface powered by Hermes Agent — multi-model, multi-platform messaging gateway.</div>
-        <div class="card-tags">
-          <span class="card-tag">AI</span>
-          <span class="card-tag">Chat</span>
-          <span class="card-tag">:8787</span>
-        </div>
-      </div>
+<!-- ── RATES 10% ── -->
+<section class="rat">
+  <div class="rat-grid">
+    <div class="rat-card">
+      <div class="rat-pair">🇨🇳→🇯🇵 CNY/JPY</div>
+      <div class="rat-val"  id="v-cny-jpy">—</div>
+      <div class="rat-note">1 人民币 兑 日元</div>
+    </div>
+    <div class="rat-card">
+      <div class="rat-pair">🇯🇵→🇨🇳 JPY/CNY</div>
+      <div class="rat-val"  id="v-jpy-cny">—</div>
+      <div class="rat-note">1 日元 兑 人民币</div>
+    </div>
+    <div class="rat-card">
+      <div class="rat-pair">🇺🇸→🇨🇳 USD/CNY</div>
+      <div class="rat-val"  id="v-usd-cny">—</div>
+      <div class="rat-note">1 美元 兑 人民币</div>
+    </div>
+    <div class="rat-card">
+      <div class="rat-pair">🇨🇳→🇺🇸 CNY/USD</div>
+      <div class="rat-val"  id="v-cny-usd">—</div>
+      <div class="rat-note">1 人民币 兑 美元</div>
+    </div>
+    <div class="rat-card">
+      <div class="rat-pair">🇺🇸→🇯🇵 USD/JPY</div>
+      <div class="rat-val"  id="v-usd-jpy">—</div>
+      <div class="rat-note">1 美元 兑 日元</div>
+    </div>
+    <div class="rat-card">
+      <div class="rat-pair">🇯🇵→🇺🇸 JPY/USD</div>
+      <div class="rat-val"  id="v-jpy-usd">—</div>
+      <div class="rat-note">1 日元 兑 美元</div>
     </div>
   </div>
-
-  <div class="tool-card" data-tags="hermes workspace dashboard">
-    <a class="card-link" href="http://localhost:3000" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon ai">W</div>
-      <div class="card-info">
-        <div class="card-title">
-          Hermes Workspace
-          <span class="card-status local">Local</span>
-        </div>
-        <div class="card-desc">Full-featured web workspace — chat, file management, project context for AI-assisted workflows.</div>
-        <div class="card-tags">
-          <span class="card-tag">Dashboard</span>
-          <span class="card-tag">:3000</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="tool-card" data-tags="hermes dashboard monitoring">
-    <a class="card-link" href="http://localhost:9119" target="_blank"rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon ai">◉</div>
-      <div class="card-info">
-        <div class="card-title">
-          Hermes Dashboard
-          <span class="card-status local">Local</span>
-        </div>
-        <div class="card-desc">Agent monitoring dashboard — token usage, session stats, model health at a glance.</div>
-        <div class="card-tags">
-          <span class="card-tag">Monitor</span>
-          <span class="card-tag">:9119</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="tool-card" data-tags="open design prototype figma">
-    <a class="card-link" href="http://localhost:52404" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon design">◈</div>
-      <div class="card-info">
-        <div class="card-title">
-          Open Design
-          <span class="card-status local">Local</span>
-        </div>
-        <div class="card-desc">Open-source design platform — create prototypes, wireframes, and high-fidelity designs with AI CLI integration.</div>
-        <div class="card-tags">
-          <span class="card-tag">Design</span>
-          <span class="card-tag">:52404</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ Dev & Repos ═══ -->
-<div class="section-title" style="margin-top:-4px">📦 Dev & Repos</div>
-<div class="tool-grid">
-  <div class="tool-card" data-tags="github profile miyazawa ron">
-    <a class="card-link" href="https://github.com/Miyazawa-ron" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon git">⌂</div>
-      <div class="card-info">
-        <div class="card-title">
-          GitHub Profile
-          <span class="card-status online">@Miyazawa-ron</span>
-        </div>
-        <div class="card-desc">Personal GitHub account — open-source projects, tools, and collaborative work.</div>
-        <div class="card-tags">
-          <span class="card-tag">GitHub</span>
-          <span class="card-tag">OSS</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="tool-card" data-tags="obsidian vault notes knowledge">
-    <a class="card-link" href="https://github.com/Miyazawa-ron/obsidian-vault" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon git">◇</div>
-      <div class="card-info">
-        <div class="card-title">
-          Obsidian Vault
-          <span class="card-status migrating">Git Sync</span>
-        </div>
-        <div class="card-desc">Personal knowledge base — skills, guides, trading strategies, and project documentation.</div>
-        <div class="card-tags">
-          <span class="card-tag">Notes</span>
-          <span class="card-tag">Wiki</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="tool-card" data-tags="moss tts nano speech audio">
-    <a class="card-link" href="https://github.com/Miyazawa-ron/MOSS-TTS-Nano" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon tool">♪</div>
-      <div class="card-info">
-        <div class="card-title">
-          MOSS-TTS-Nano
-          <span class="card-status local">Local</span>
-        </div>
-        <div class="card-desc">Lightweight text-to-speech inference — optimized for local deployment on macOS.</div>
-        <div class="card-tags">
-          <span class="card-tag">TTS</span>
-          <span class="card-tag">ML</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ Stack Info ═══ -->
-<div class="section-title" style="margin-top:-20px">⚙️ Stack</div>
-<div class="tool-grid" style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px">
-  <div class="tool-card" style="width:240px;flex:0 0 240px;padding:16px 20px">
-    <div class="card-title" style="font-size:14px">Deployed on</div>
-    <div class="card-desc" style="margin-top:4px">Cloudflare Pages</div>
-  </div>
-  <div class="tool-card" style="width:240px;flex:0 0 240px;padding:16px 20px">
-    <div class="card-title" style="font-size:14px">Domain</div>
-    <div class="card-desc" style="margin-top:4px">miyazawa-workspace.com</div>
-  </div>
-  <div class="tool-card" style="width:240px;flex:0 0 240px;padding:16px 20px">
-    <div class="card-title" style="font-size:14px">Built with</div>
-    <div class="card-desc" style="margin-top:4px">Pure HTML / CSS / JS</div>
-  </div>
-</div>
-
-<!-- ═══ Footer ═══ -->
-<footer>
-  <p>© 2026 <a href="https://github.com/Miyazawa-ron">Miyazawa Workspace</a> — powered by <a href="#">Cloudflare Pages</a></p>
-</footer>
+  <div class="rat-foot" id="rat-foot">◌ 汇率加载中…</div>
+</section>
 
 <script>
-function filterCards(){
-  const q = document.getElementById('search').value.toLowerCase().trim();
-  document.querySelectorAll('.tool-card').forEach(card => {
-    if(!q) {card.style.display='';return}
-    const tags = (card.dataset.tags||'').toLowerCase();
-    const title = card.querySelector('.card-title')?.textContent?.toLowerCase()||'';
-    const desc = card.querySelector('.card-desc')?.textContent?.toLowerCase()||'';
-    card.style.display = (tags.includes(q)||title.includes(q)||desc.includes(q)) ? '' : 'none';
-  });
-}
-</script>
+// ── utils ──
+function pad(n) { return String(n).padStart(2, '0'); }
 
+function getZone(tz) {
+  const now = new Date();
+  const tp = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, hour12: false,
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  }).formatToParts(now);
+  const gt = t => tp.find(p => p.type === t)?.value ?? '--';
+  const dp = new Intl.DateTimeFormat('zh-CN', {
+    timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(now);
+  const gd = t => dp.find(p => p.type === t)?.value ?? '--';
+  let h = gt('hour'); if (h === '24') h = '00';
+  const wd = new Intl.DateTimeFormat('zh-CN', { timeZone: tz, weekday: 'long' }).format(now);
+  return { h, m: gt('minute'), s: gt('second'), y: gd('year'), mo: gd('month'), d: gd('day'), wd };
+}
+
+// ── clocks ──
+const S = '<span class="sep">:</span>';
+
+function tick() {
+  // Tokyo
+  const tk = getZone('Asia/Tokyo');
+  document.getElementById('t-tk').innerHTML = `${tk.h}${S}${tk.m}${S}${tk.s}`;
+  document.getElementById('d-tk').textContent = `${tk.y}年${tk.mo}月${tk.d}日`;
+  document.getElementById('w-tk').textContent = tk.wd;
+
+  // Beijing
+  const bj = getZone('Asia/Shanghai');
+  document.getElementById('t-bj').innerHTML = `${bj.h}${S}${bj.m}${S}${bj.s}`;
+  document.getElementById('d-bj').textContent = `${bj.y}年${bj.mo}月${bj.d}日`;
+  document.getElementById('w-bj').textContent = bj.wd;
+
+  // New York
+  const ny = getZone('America/New_York');
+  document.getElementById('t-ny').innerHTML = `${ny.h}${S}${ny.m}${S}${ny.s}`;
+  document.getElementById('d-ny').textContent = `${ny.y}年${ny.mo}月${ny.d}日`;
+  document.getElementById('w-ny').textContent = ny.wd;
+}
+
+// ── weather ──
+const WC = {
+  0:{t:'晴天',i:'☀️'},1:{t:'基本晴',i:'🌤️'},2:{t:'部分多云',i:'⛅'},3:{t:'阴天',i:'☁️'},
+  45:{t:'雾',i:'🌫️'},48:{t:'冰雾',i:'🌫️'},
+  51:{t:'细雨',i:'🌦️'},53:{t:'毛毛雨',i:'🌦️'},55:{t:'浓细雨',i:'🌧️'},
+  61:{t:'小雨',i:'🌧️'},63:{t:'中雨',i:'🌧️'},65:{t:'大雨',i:'🌧️'},
+  71:{t:'小雪',i:'🌨️'},73:{t:'中雪',i:'🌨️'},75:{t:'大雪',i:'❄️'},77:{t:'雪粒',i:'🌨️'},
+  80:{t:'阵雨',i:'🌦️'},81:{t:'中阵雨',i:'🌧️'},82:{t:'强阵雨',i:'⛈️'},
+  85:{t:'阵雪',i:'🌨️'},86:{t:'强阵雪',i:'❄️'},
+  95:{t:'雷雨',i:'⛈️'},96:{t:'雷暴冰雹',i:'⛈️'},99:{t:'强雷暴冰雹',i:'⛈️'},
+};
+
+async function fetchWeather() {
+  const el = document.getElementById('wth-wrap');
+  try {
+    const r = await fetch(
+      'https://api.open-meteo.com/v1/forecast' +
+      '?latitude=35.70&longitude=140.52' +
+      '&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code' +
+      '&timezone=Asia%2FTokyo&wind_speed_unit=kmh'
+    );
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    const c = d.current;
+    const wc = WC[c.weather_code] ?? { t: '未知', i: '❓' };
+    const now = new Date();
+
+    el.innerHTML = `
+      <div class="wth-loc">横芝光町 · 千葉県 · JAPAN &nbsp;·&nbsp; 35.70°N 140.52°E</div>
+      <div class="wth-row">
+        <div class="wth-left">
+          <div class="wth-icon">${wc.i}</div>
+          <div>
+            <div class="wth-temp">${Math.round(c.temperature_2m)}<span class="wth-deg">°C</span></div>
+            <div class="wth-desc">${wc.t}</div>
+            <div class="wth-feel">体感 / Feels Like &nbsp;${Math.round(c.apparent_temperature)}°C</div>
+          </div>
+        </div>
+        <div class="wth-vline"></div>
+        <div class="wth-stats">
+          <div>
+            <div class="wth-stat-lbl">湿度 / HUMIDITY</div>
+            <div class="wth-stat-val">${c.relative_humidity_2m}<span class="wth-stat-unit">%</span></div>
+          </div>
+          <div>
+            <div class="wth-stat-lbl">风速 / WIND</div>
+            <div class="wth-stat-val">${Math.round(c.wind_speed_10m)}<span class="wth-stat-unit">km/h</span></div>
+          </div>
+        </div>
+        <div class="wth-updated">UPDATED &nbsp;${pad(now.getHours())}:${pad(now.getMinutes())}</div>
+      </div>`;
+  } catch {
+    el.innerHTML = '<div class="wth-msg">⚠ 天气数据获取失败 · Weather data unavailable</div>';
+  }
+}
+
+// ── exchange rates ──
+async function fetchRates() {
+  const foot = document.getElementById('rat-foot');
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/USD');
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    if (d.result !== 'success') throw 0;
+    const { CNY, JPY } = d.rates;
+
+    document.getElementById('v-cny-jpy').textContent = (JPY / CNY).toFixed(3);
+    document.getElementById('v-jpy-cny').textContent = (CNY / JPY).toFixed(5);
+    document.getElementById('v-usd-cny').textContent = CNY.toFixed(4);
+    document.getElementById('v-cny-usd').textContent = (1 / CNY).toFixed(5);
+    document.getElementById('v-usd-jpy').textContent = JPY.toFixed(2);
+    document.getElementById('v-jpy-usd').textContent = (1 / JPY).toFixed(6);
+
+    const now = new Date();
+    foot.textContent =
+      `UPDATED ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}` +
+      `  ·  SOURCE: EXCHANGERATE-API.COM  ·  仅供参考`;
+  } catch {
+    foot.textContent = '⚠ 汇率数据获取失败';
+  }
+}
+
+// ── fullscreen ──
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
+// ── init ──
+tick();
+setInterval(tick, 1000);
+fetchWeather();
+setInterval(fetchWeather, 10 * 60 * 1000);
+fetchRates();
+setInterval(fetchRates, 60 * 60 * 1000);
+</script>
 </body>
 </html>
