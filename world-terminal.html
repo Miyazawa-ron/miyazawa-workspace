@@ -15,8 +15,8 @@
   --orange: #E86020;
   --og:     rgba(232,96,32,0.5);
   --white:  #d2d2d2;
-  --dim:    #555555;
-  --dim2:   #3a3a3a;
+  --dim:    #909090;
+  --dim2:   #707070;
   --blue:   #7aaacc;
 }
 
@@ -232,6 +232,76 @@ body::after {
   font-size: 11px; color: var(--dim2);
   letter-spacing: 2px; text-align: center;
   margin-top: 5px;
+}
+
+/* ════════════════════════════════
+   TABLET  (≤ 900px)
+   ════════════════════════════════ */
+@media (max-width: 900px) {
+  .rat-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+  .rat { flex: 1.5; }
+  .cit { flex: 1.5; }
+}
+
+/* ════════════════════════════════
+   MOBILE  (≤ 600px)
+   ════════════════════════════════ */
+@media (max-width: 600px) {
+  html, body { overflow: auto; }
+  body { height: auto; min-height: 100dvh; }
+
+  .fs-btn { display: none; }
+
+  /* Tokyo — shrink slightly to give other sections room */
+  .tok { flex: 4; padding: 10px 14px; }
+  .tok-header { font-size: 13px; letter-spacing: 3px; margin-bottom: 8px; }
+  .tok-date { font-size: 14px; margin-top: 10px; letter-spacing: 2px; }
+  .tok-wd   { font-size: 13px; margin-top: 4px; }
+  .tok-tz   { font-size: 11px; margin-top: 6px; }
+
+  /* Weather — wrap into two rows */
+  .wth { flex: 3; padding: 10px 14px; }
+  .wth-loc { font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; }
+  .wth-row { flex-wrap: wrap; align-items: flex-start; gap: 8px; }
+  .wth-left { gap: 10px; }
+  .wth-icon { font-size: min(12vw, 11vh); }
+  .wth-temp { font-size: min(13vw, 13vh); }
+  .wth-desc { font-size: 14px; }
+  .wth-feel { font-size: 12px; }
+  .wth-vline { display: none; }
+  .wth-stats { gap: 22px; align-items: center; }
+  .wth-stat-lbl { font-size: 11px; margin-bottom: 3px; }
+  .wth-stat-val { font-size: clamp(18px, 5vw, 28px); }
+  .wth-stat-unit { font-size: 13px; }
+  .wth-updated { margin-left: 0; width: 100%; text-align: right; font-size: 11px; }
+
+  /* Cities — keep side by side, hide secondary info */
+  .cit { flex: 1.5; }
+  .cit-card { gap: 8px; padding: 0 10px; }
+  .cit-city { font-size: 11px; letter-spacing: 2px; }
+  .cit-time { font-size: clamp(17px, 5.5vw, 30px); }
+  .cit-date { font-size: 11px; }
+  .cit-wd-s { display: none; }
+  .cit-tz   { font-size: 10px; }
+
+  /* Rates — 3×2 grid, hide note text */
+  .rat { flex: 1.5; padding: 0 8px; }
+  .rat-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 5px; }
+  .rat-card { padding: 4px 8px; }
+  .rat-pair { font-size: 10px; margin-bottom: 2px; }
+  .rat-val  { font-size: clamp(12px, 3.8vw, 18px); }
+  .rat-note { display: none; }
+  .rat-foot { font-size: 9px; margin-top: 3px; }
+}
+
+/* ════════════════════════════════
+   SMALL PHONE  (≤ 390px)
+   ════════════════════════════════ */
+@media (max-width: 390px) {
+  .tok-header { font-size: 11px; }
+  .wth-stats { gap: 14px; }
+  .cit-time { font-size: clamp(15px, 5vw, 24px); }
+  .rat-pair { font-size: 9px; }
 }
 </style>
 </head>
