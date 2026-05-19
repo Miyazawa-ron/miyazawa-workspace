@@ -89,16 +89,110 @@ body::after {
   font-family: 'Orbitron', sans-serif;
   font-size: min(14.5vw, 30vh);
   font-weight: 900;
-  color: #e0e0e0;
-  text-shadow: 0 0 60px rgba(220,220,220,0.12);
-  letter-spacing: 0.02em;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.07em;
 }
-.tok-time .sep {
+
+.fd-block { display: flex; gap: 0.025em; }
+
+.fd-sep {
   color: var(--orange);
   text-shadow: 0 0 16px var(--og);
   animation: blink 1s step-end infinite;
+  align-self: center;
 }
+
+/* ── FLIP DIGIT CELLS (split-flap / 翻牌) ── */
+.fd {
+  position: relative;
+  display: inline-block;
+  width: 0.72em;
+  height: 1em;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgba(8,8,12,0.35);
+}
+
+/* center divider line */
+.fd::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 0; right: 0;
+  height: 1px;
+  background: rgba(0,0,0,0.75);
+  z-index: 30;
+  pointer-events: none;
+}
+
+/* static background halves */
+.fd-bg-t, .fd-bg-b {
+  position: absolute;
+  left: 0; width: 100%; height: 50%;
+  overflow: hidden;
+}
+.fd-bg-t { top: 0; }
+.fd-bg-b { bottom: 0; }
+
+.fd-bg-t .fd-c {
+  position: absolute;
+  top: -0.05em; left: 0; right: 0;
+  text-align: center;
+  color: #dde0ec;
+}
+.fd-bg-b .fd-c {
+  position: absolute;
+  bottom: -0.05em; left: 0; right: 0;
+  text-align: center;
+  color: #dde0ec;
+}
+
+/* animated flaps */
+.fd-flap-t {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 50%;
+  overflow: hidden;
+  transform-origin: center bottom;
+  z-index: 10;
+  background: rgba(12,12,18,0.4);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+}
+.fd-flap-t .fd-c {
+  position: absolute;
+  top: -0.05em; left: 0; right: 0;
+  text-align: center;
+  color: #dde0ec;
+}
+
+.fd-flap-b {
+  position: absolute;
+  bottom: 0; left: 0; width: 100%; height: 50%;
+  overflow: hidden;
+  transform-origin: center top;
+  transform: perspective(600px) rotateX(90deg);
+  z-index: 10;
+  background: rgba(12,12,18,0.4);
+  box-shadow: 0 -3px 8px rgba(0,0,0,0.6);
+}
+.fd-flap-b .fd-c {
+  position: absolute;
+  bottom: -0.05em; left: 0; right: 0;
+  text-align: center;
+  color: #dde0ec;
+}
+
+@keyframes flapOut {
+  0%   { transform: perspective(600px) rotateX(0deg); }
+  100% { transform: perspective(600px) rotateX(-90deg); }
+}
+@keyframes flapIn {
+  0%   { transform: perspective(600px) rotateX(90deg); }
+  100% { transform: perspective(600px) rotateX(0deg); }
+}
+.fd-flap-t.anim-out { animation: flapOut 0.18s ease-in  forwards; }
+.fd-flap-b.anim-in  { animation: flapIn  0.18s ease-out 0.16s forwards; }
 @keyframes blink { 50% { opacity: 0.1; } }
 
 .tok-date {
@@ -315,7 +409,11 @@ body::after {
     <span class="tok-flag">🇯🇵</span>東 京 · T O K Y O
   </div>
   <div class="tok-time" id="t-tk">
-    --<span class="sep">:</span>--<span class="sep">:</span>--
+    <div class="fd-block"><div class="fd" id="fd0"></div><div class="fd" id="fd1"></div></div>
+    <span class="fd-sep">:</span>
+    <div class="fd-block"><div class="fd" id="fd2"></div><div class="fd" id="fd3"></div></div>
+    <span class="fd-sep">:</span>
+    <div class="fd-block"><div class="fd" id="fd4"></div><div class="fd" id="fd5"></div></div>
   </div>
   <div class="tok-date" id="d-tk">----年--月--日</div>
   <div class="tok-wd"   id="w-tk">---</div>
@@ -408,13 +506,59 @@ function getZone(tz) {
   return { h, m: gt('minute'), s: gt('second'), y: gd('year'), mo: gd('month'), d: gd('day'), wd };
 }
 
+// ── flip digit system ──
+const FD_IDS = ['fd0','fd1','fd2','fd3','fd4','fd5'];
+let fdVals = Array(6).fill('');
+
+function initFD(id) {
+  const el = document.getElementById(id);
+  el.innerHTML = `
+    <div class="fd-bg-t"><div class="fd-c"></div></div>
+    <div class="fd-bg-b"><div class="fd-c"></div></div>
+    <div class="fd-flap-t"><div class="fd-c"></div></div>
+    <div class="fd-flap-b"><div class="fd-c"></div></div>`;
+}
+
+function setFD(idx, val) {
+  if (fdVals[idx] === val) return;
+  const old = fdVals[idx];
+  fdVals[idx] = val;
+  const el = document.getElementById(FD_IDS[idx]);
+  if (!old) {
+    el.querySelectorAll('.fd-c').forEach(c => c.textContent = val);
+    return;
+  }
+  const bgT   = el.querySelector('.fd-bg-t .fd-c');
+  const bgB   = el.querySelector('.fd-bg-b .fd-c');
+  const flapT = el.querySelector('.fd-flap-t');
+  const flapTC= el.querySelector('.fd-flap-t .fd-c');
+  const flapB = el.querySelector('.fd-flap-b');
+  const flapBC= el.querySelector('.fd-flap-b .fd-c');
+  bgT.textContent  = val;
+  flapTC.textContent = old;
+  flapBC.textContent = val;
+  flapT.classList.remove('anim-out');
+  flapB.classList.remove('anim-in');
+  void flapT.offsetWidth;
+  flapT.classList.add('anim-out');
+  flapB.classList.add('anim-in');
+  setTimeout(() => {
+    bgB.textContent = val;
+    flapT.classList.remove('anim-out');
+    flapB.classList.remove('anim-in');
+  }, 420);
+}
+
+FD_IDS.forEach(initFD);
+
 // ── clocks ──
 const S = '<span class="sep">:</span>';
 
 function tick() {
   // Tokyo
   const tk = getZone('Asia/Tokyo');
-  document.getElementById('t-tk').innerHTML = `${tk.h}${S}${tk.m}${S}${tk.s}`;
+  const ds = tk.h + tk.m + tk.s;
+  ds.split('').forEach((ch, i) => setFD(i, ch));
   document.getElementById('d-tk').textContent = `${tk.y}年${tk.mo}月${tk.d}日`;
   document.getElementById('w-tk').textContent = tk.wd;
 
