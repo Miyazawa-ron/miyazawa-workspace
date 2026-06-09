@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Translator — miyazawa-workspace</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #c9c2a8;
+    --paper: #ece6cf;
+    --ink: #15161a;
+    --ink-dim: #5c5a52;
+    --accent: #E86020;
+    --border: #b8b09a;
+    --radius: 4px;
+    --mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  body {
+    font-family: var(--mono);
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 20px 32px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  header a {
+    font-size: 12px;
+    color: var(--ink-dim);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+  header a:hover { color: var(--accent); }
+  .site-title { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-dim); }
+  .page-title { font-size: 18px; font-weight: 700; letter-spacing: 0.04em; }
+
+  /* ── Main ── */
+  main {
+    flex: 1;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* ── Lang selector ── */
+  .lang-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .lang-group {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .lang-btn {
+    padding: 6px 16px;
+    background: var(--paper);
+    border: none;
+    border-right: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .lang-btn:last-child { border-right: none; }
+  .lang-btn.active { background: var(--ink); color: var(--bg); }
+  .lang-btn:hover:not(.active) { background: var(--border); color: var(--ink); }
+
+  .swap-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-dim);
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .swap-btn:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .arrow { color: var(--ink-dim); font-size: 13px; letter-spacing: 0.03em; }
+
+  /* ── Panels ── */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .panel {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-label {
+    padding: 8px 14px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--ink-dim);
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+  }
+  textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink);
+    min-height: 200px;
+  }
+  textarea::placeholder { color: var(--border); }
+  #outputText { color: #2a4a2a; }
+
+  .panel-footer {
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .char-count { font-size: 11px; color: var(--ink-dim); }
+  .copy-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .copy-btn.copied { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* ── Action row ── */
+  .action-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .translate-btn {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 10px 28px;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .translate-btn:hover { background: var(--accent); }
+  .translate-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .translate-btn:disabled:hover { background: var(--ink); }
+
+  .status {
+    font-size: 12px;
+    color: var(--ink-dim);
+    letter-spacing: 0.03em;
+  }
+  .status.loading { color: var(--accent); }
+  .status.error { color: #c0392b; }
+  .status.ok { color: #2a7a2a; }
+
+  /* ── Footer ── */
+  footer {
+    padding: 16px 32px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    main { padding: 16px; }
+    .panels { grid-template-columns: 1fr; }
+    textarea { min-height: 140px; }
+    header { padding: 14px 16px; flex-wrap: wrap; }
+    footer { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="site-title"><a href="/">MIYAZAWA-WORKSPACE</a></span>
+  <span style="color:var(--border)">·</span>
+  <span class="page-title">TRANSLATOR</span>
+</header>
+
+<main>
+  <div class="lang-row">
+    <div class="lang-group" id="srcGroup">
+      <button class="lang-btn active" data-lang="zh">中文</button>
+      <button class="lang-btn" data-lang="ja">日本語</button>
+      <button class="lang-btn" data-lang="en">English</button>
+    </div>
+    <button class="swap-btn" id="swapBtn" title="swap">⇄</button>
+    <span class="arrow" id="arrow">→</span>
+    <div class="lang-group" id="dstGroup">
+      <button class="lang-btn active" data-lang="en">English</button>
+      <button class="lang-btn" data-lang="ja">日本語</button>
+      <button class="lang-btn" data-lang="zh">中文</button>
+    </div>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-label" id="srcLabel">SOURCE</div>
+      <textarea id="inputText" placeholder="Input text…" spellcheck="false"></textarea>
+      <div class="panel-footer">
+        <span class="char-count" id="charIn">0</span>
+        <button class="copy-btn" id="copyIn">COPY</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-label" id="dstLabel">TRANSLATION</div>
+      <textarea id="outputText" placeholder="Result…" readonly spellcheck="false"></textarea>
+      <div class="panel-footer">
+        <span class="char-count" id="charOut">0</span>
+        <button class="copy-btn" id="copyOut">COPY</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <button class="translate-btn" id="translateBtn">TRANSLATE →</button>
+    <span class="status" id="status">Ready — Qwen 1.5B local model</span>
+  </div>
+</main>
+
+<footer>powered by Qwen2.5-1.5B · llama.cpp · running locally on Intel Mac</footer>
+
+<script>
+const API_URL = 'https://duplicate-principles-pens-spectacular.trycloudflare.com/v1/chat/completions';
+
+const LANG_NAMES = { zh: '中文', ja: '日本語', en: 'English' };
+const SYSTEM_PROMPTS = {
+  'zh→en': 'Translate the following Chinese text to English. Output ONLY the translation.',
+  'zh→ja': '以下の中国語テキストを日本語に翻訳してください。翻訳のみ出力してください。',
+  'ja→zh': '将以下日语文本翻译成中文。只输出翻译结果。',
+  'ja→en': 'Translate the following Japanese text to English. Output ONLY the translation.',
+  'en→zh': '将以下英语文本翻译成中文。只输出翻译结果。',
+  'en→ja': '以下の英語テキストを日本語に翻訳してください。翻訳のみ出力してください。',
+};
+
+const state = { src: 'zh', dst: 'en', busy: false };
+
+const inputText  = document.getElementById('inputText');
+const outputText = document.getElementById('outputText');
+const translateBtn = document.getElementById('translateBtn');
+const statusEl   = document.getElementById('status');
+const charIn     = document.getElementById('charIn');
+const charOut    = document.getElementById('charOut');
+const srcLabel   = document.getElementById('srcLabel');
+const dstLabel   = document.getElementById('dstLabel');
+const arrowEl    = document.getElementById('arrow');
+
+// ── lang groups ──
+function setupGroup(groupId, key) {
+  document.getElementById(groupId).addEventListener('click', e => {
+    const btn = e.target.closest('.lang-btn');
+    if (!btn) return;
+    document.querySelectorAll(`#${groupId} .lang-btn`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state[key] = btn.dataset.lang;
+    updateLabels();
+    scheduleTranslate();
+  });
+}
+setupGroup('srcGroup', 'src');
+setupGroup('dstGroup', 'dst');
+
+function updateLabels() {
+  srcLabel.textContent = `SOURCE — ${LANG_NAMES[state.src]}`;
+  dstLabel.textContent = `TRANSLATION — ${LANG_NAMES[state.dst]}`;
+  arrowEl.textContent  = `${LANG_NAMES[state.src]} → ${LANG_NAMES[state.dst]}`;
+}
+
+// ── swap ──
+document.getElementById('swapBtn').addEventListener('click', () => {
+  [state.src, state.dst] = [state.dst, state.src];
+  ['srcGroup','dstGroup'].forEach((gid, i) => {
+    const lang = i === 0 ? state.src : state.dst;
+    const g = document.getElementById(gid);
+    g.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  });
+  [inputText.value, outputText.value] = [outputText.value, inputText.value];
+  updateCharCount();
+  updateLabels();
+  scheduleTranslate();
+});
+
+// ── translate ──
+async function doTranslate() {
+  const text = inputText.value.trim();
+  if (!text || state.busy) return;
+  if (state.src === state.dst) { outputText.value = text; return; }
+
+  state.busy = true;
+  translateBtn.disabled = true;
+  translateBtn.textContent = 'TRANSLATING…';
+  setStatus('loading', '⟳ translating…');
+  outputText.value = '';
+
+  const key = `${state.src}→${state.dst}`;
+  const sysPrompt = SYSTEM_PROMPTS[key] || `Translate to ${LANG_NAMES[state.dst]}. Output ONLY the translation.`;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'qwen',
+        messages: [
+          { role: 'system', content: sysPrompt },
+          { role: 'user',   content: text }
+        ],
+        max_tokens: 1024,
+        temperature: 0.1,
+      }),
+    });
+    const data = await res.json();
+    const result = data?.choices?.[0]?.message?.content?.trim();
+    if (result) {
+      outputText.value = result;
+      updateCharCount();
+      setStatus('ok', '✓ done');
+    } else {
+      setStatus('error', '✗ empty response');
+    }
+  } catch (err) {
+    setStatus('error', `✗ ${err.message}`);
+  } finally {
+    state.busy = false;
+    translateBtn.disabled = false;
+    translateBtn.textContent = 'TRANSLATE →';
+  }
+}
+
+translateBtn.addEventListener('click', doTranslate);
+inputText.addEventListener('keydown', e => { if (e.ctrlKey && e.key === 'Enter') doTranslate(); });
+
+let autoTimer = null;
+function scheduleTranslate() {
+  clearTimeout(autoTimer);
+  if (inputText.value.trim()) autoTimer = setTimeout(doTranslate, 1000);
+}
+inputText.addEventListener('input', () => { updateCharCount(); scheduleTranslate(); });
+
+// ── utils ──
+function updateCharCount() {
+  charIn.textContent  = inputText.value.length;
+  charOut.textContent = outputText.value.length;
+}
+function setStatus(cls, msg) {
+  statusEl.className = `status ${cls}`;
+  statusEl.textContent = msg;
+}
+
+function setupCopy(btnId, getVal) {
+  document.getElementById(btnId).addEventListener('click', async () => {
+    const t = getVal(); if (!t) return;
+    try { await navigator.clipboard.writeText(t); } catch { /* fallback */ }
+    const btn = document.getElementById(btnId);
+    btn.textContent = 'COPIED ✓'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+setupCopy('copyIn',  () => inputText.value);
+setupCopy('copyOut', () => outputText.value);
+
+updateLabels();
+updateCharCount();
+</script>
+</body>
+</html>
