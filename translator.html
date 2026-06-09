@@ -27,6 +27,75 @@
     flex-direction: column;
   }
 
+  /* ── Password Gate ── */
+  #gate {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  #gate.hidden { display: none; }
+
+  .gate-box {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px 48px;
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .gate-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+  }
+  .gate-subtitle {
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.04em;
+    margin-top: -12px;
+  }
+  .gate-input {
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--ink);
+    outline: none;
+    letter-spacing: 0.1em;
+    width: 100%;
+  }
+  .gate-input:focus { border-color: var(--ink); }
+  .gate-input.error { border-color: #c0392b; }
+  .gate-btn {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 10px;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .gate-btn:hover { background: var(--accent); }
+  .gate-error {
+    font-size: 11px;
+    color: #c0392b;
+    letter-spacing: 0.04em;
+    min-height: 16px;
+  }
+
   /* ── Header ── */
   header {
     padding: 20px 32px 16px;
@@ -35,15 +104,24 @@
     align-items: baseline;
     gap: 16px;
   }
-  header a {
-    font-size: 12px;
-    color: var(--ink-dim);
-    text-decoration: none;
-    letter-spacing: 0.05em;
-  }
+  header a { font-size: 12px; color: var(--ink-dim); text-decoration: none; letter-spacing: 0.05em; }
   header a:hover { color: var(--accent); }
   .site-title { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-dim); }
   .page-title { font-size: 18px; font-weight: 700; letter-spacing: 0.04em; }
+  .logout-btn {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 4px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .logout-btn:hover { border-color: var(--ink); color: var(--ink); }
 
   /* ── Main ── */
   main {
@@ -58,18 +136,8 @@
   }
 
   /* ── Lang selector ── */
-  .lang-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .lang-group {
-    display: flex;
-    gap: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
+  .lang-row { display: flex; align-items: center; gap: 12px; }
+  .lang-group { display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   .lang-btn {
     padding: 6px 16px;
     background: var(--paper);
@@ -87,141 +155,85 @@
   .lang-btn:hover:not(.active) { background: var(--border); color: var(--ink); }
 
   .swap-btn {
-    width: 32px;
-    height: 32px;
-    background: var(--paper);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--ink-dim);
-    transition: all 0.15s;
-    flex-shrink: 0;
+    width: 32px; height: 32px;
+    background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-dim); transition: all 0.15s; flex-shrink: 0;
   }
   .swap-btn:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-
   .arrow { color: var(--ink-dim); font-size: 13px; letter-spacing: 0.03em; }
 
   /* ── Panels ── */
-  .panels {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .panel {
-    background: var(--paper);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-  }
-  .panel-label {
-    padding: 8px 14px;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    color: var(--ink-dim);
-    border-bottom: 1px solid var(--border);
-    text-transform: uppercase;
-  }
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .panel { background: var(--paper); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; }
+  .panel-label { padding: 8px 14px; font-size: 10px; letter-spacing: 0.12em; color: var(--ink-dim); border-bottom: 1px solid var(--border); text-transform: uppercase; }
   textarea {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    resize: none;
-    padding: 14px;
-    font-family: var(--mono);
-    font-size: 15px;
-    line-height: 1.7;
-    color: var(--ink);
-    min-height: 200px;
+    flex: 1; background: transparent; border: none; outline: none; resize: none;
+    padding: 14px; font-family: var(--mono); font-size: 15px; line-height: 1.7;
+    color: var(--ink); min-height: 200px;
   }
   textarea::placeholder { color: var(--border); }
   #outputText { color: #2a4a2a; }
 
-  .panel-footer {
-    padding: 8px 14px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+  .panel-footer { padding: 8px 14px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
   .char-count { font-size: 11px; color: var(--ink-dim); }
   .copy-btn {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    padding: 3px 10px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--ink-dim);
-    cursor: pointer;
-    transition: all 0.15s;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    padding: 3px 10px; background: transparent; border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--ink-dim); cursor: pointer; transition: all 0.15s;
   }
   .copy-btn:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
   .copy-btn.copied { background: var(--accent); color: #fff; border-color: var(--accent); }
 
   /* ── Action row ── */
-  .action-row {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
+  .action-row { display: flex; align-items: center; gap: 16px; }
   .translate-btn {
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    padding: 10px 28px;
-    background: var(--ink);
-    color: var(--bg);
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: background 0.15s;
+    font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+    padding: 10px 28px; background: var(--ink); color: var(--bg);
+    border: none; border-radius: var(--radius); cursor: pointer; transition: background 0.15s;
   }
   .translate-btn:hover { background: var(--accent); }
   .translate-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .translate-btn:disabled:hover { background: var(--ink); }
 
-  .status {
-    font-size: 12px;
-    color: var(--ink-dim);
-    letter-spacing: 0.03em;
-  }
+  .status { font-size: 12px; color: var(--ink-dim); letter-spacing: 0.03em; }
   .status.loading { color: var(--accent); }
   .status.error { color: #c0392b; }
   .status.ok { color: #2a7a2a; }
 
   /* ── Footer ── */
-  footer {
-    padding: 16px 32px;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--ink-dim);
-    letter-spacing: 0.04em;
-  }
+  footer { padding: 16px 32px; border-top: 1px solid var(--border); font-size: 11px; color: var(--ink-dim); letter-spacing: 0.04em; }
 
-  /* ── Responsive ── */
   @media (max-width: 640px) {
     main { padding: 16px; }
     .panels { grid-template-columns: 1fr; }
     textarea { min-height: 140px; }
     header { padding: 14px 16px; flex-wrap: wrap; }
     footer { padding: 12px 16px; }
+    .gate-box { width: 90%; padding: 32px 24px; }
   }
 </style>
 </head>
 <body>
 
+<!-- ── Password Gate ── -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-title">TRANSLATOR</div>
+    <div class="gate-subtitle">miyazawa-workspace · private access</div>
+    <input type="password" id="pwInput" class="gate-input" placeholder="Enter access key…" autocomplete="current-password" />
+    <div class="gate-error" id="gateError"></div>
+    <button class="gate-btn" id="gateBtn">ENTER →</button>
+  </div>
+</div>
+
+<!-- ── App ── -->
 <header>
   <span class="site-title"><a href="/">MIYAZAWA-WORKSPACE</a></span>
   <span style="color:var(--border)">·</span>
   <span class="page-title">TRANSLATOR</span>
+  <button class="logout-btn" id="logoutBtn">LOCK</button>
 </header>
 
 <main>
@@ -268,31 +280,63 @@
 <footer>powered by Qwen2.5-1.5B · llama.cpp · running locally on Intel Mac</footer>
 
 <script>
-const API_URL = 'https://translator-api.miyazawa-workspace.com/v1/chat/completions';
+const STORAGE_KEY = 'translator_access_key';
+const state = { src: 'zh', dst: 'en', busy: false, key: '' };
 
+// ── Gate ──────────────────────────────────────────────────
+const gate     = document.getElementById('gate');
+const pwInput  = document.getElementById('pwInput');
+const gateBtn  = document.getElementById('gateBtn');
+const gateError = document.getElementById('gateError');
+
+async function tryUnlock(pw) {
+  gateError.textContent = '';
+  gateBtn.textContent = 'CHECKING…';
+  gateBtn.disabled = true;
+
+  // 用密码试调一次 API，让后端来验证
+  try {
+    const res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Access-Key': pw },
+      body: JSON.stringify({ text: 'test', source: 'en', target: 'zh' }),
+    });
+    if (res.status === 401) {
+      pwInput.classList.add('error');
+      gateError.textContent = '✗ Incorrect access key';
+    } else {
+      // 正确 — 保存并进入
+      localStorage.setItem(STORAGE_KEY, pw);
+      state.key = pw;
+      gate.classList.add('hidden');
+      pwInput.classList.remove('error');
+    }
+  } catch {
+    gateError.textContent = '✗ Service unreachable — check if local model is running';
+  }
+
+  gateBtn.textContent = 'ENTER →';
+  gateBtn.disabled = false;
+}
+
+gateBtn.addEventListener('click', () => tryUnlock(pwInput.value.trim()));
+pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(pwInput.value.trim()); });
+
+// LOCK ボタン
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem(STORAGE_KEY);
+  state.key = '';
+  pwInput.value = '';
+  gate.classList.remove('hidden');
+});
+
+// 起動時にキャッシュされたキーで自動アンロック試行
+const cachedKey = localStorage.getItem(STORAGE_KEY);
+if (cachedKey) tryUnlock(cachedKey);
+
+// ── Lang groups ───────────────────────────────────────────
 const LANG_NAMES = { zh: '中文', ja: '日本語', en: 'English' };
-const SYSTEM_PROMPTS = {
-  'zh→en': 'Translate the following Chinese text to English. Output ONLY the translation.',
-  'zh→ja': '以下の中国語テキストを日本語に翻訳してください。翻訳のみ出力してください。',
-  'ja→zh': '将以下日语文本翻译成中文。只输出翻译结果。',
-  'ja→en': 'Translate the following Japanese text to English. Output ONLY the translation.',
-  'en→zh': '将以下英语文本翻译成中文。只输出翻译结果。',
-  'en→ja': '以下の英語テキストを日本語に翻訳してください。翻訳のみ出力してください。',
-};
 
-const state = { src: 'zh', dst: 'en', busy: false };
-
-const inputText  = document.getElementById('inputText');
-const outputText = document.getElementById('outputText');
-const translateBtn = document.getElementById('translateBtn');
-const statusEl   = document.getElementById('status');
-const charIn     = document.getElementById('charIn');
-const charOut    = document.getElementById('charOut');
-const srcLabel   = document.getElementById('srcLabel');
-const dstLabel   = document.getElementById('dstLabel');
-const arrowEl    = document.getElementById('arrow');
-
-// ── lang groups ──
 function setupGroup(groupId, key) {
   document.getElementById(groupId).addEventListener('click', e => {
     const btn = e.target.closest('.lang-btn');
@@ -308,26 +352,33 @@ setupGroup('srcGroup', 'src');
 setupGroup('dstGroup', 'dst');
 
 function updateLabels() {
-  srcLabel.textContent = `SOURCE — ${LANG_NAMES[state.src]}`;
-  dstLabel.textContent = `TRANSLATION — ${LANG_NAMES[state.dst]}`;
-  arrowEl.textContent  = `${LANG_NAMES[state.src]} → ${LANG_NAMES[state.dst]}`;
+  document.getElementById('srcLabel').textContent = `SOURCE — ${LANG_NAMES[state.src]}`;
+  document.getElementById('dstLabel').textContent = `TRANSLATION — ${LANG_NAMES[state.dst]}`;
+  document.getElementById('arrow').textContent = `${LANG_NAMES[state.src]} → ${LANG_NAMES[state.dst]}`;
 }
 
-// ── swap ──
+// ── Swap ──────────────────────────────────────────────────
 document.getElementById('swapBtn').addEventListener('click', () => {
   [state.src, state.dst] = [state.dst, state.src];
   ['srcGroup','dstGroup'].forEach((gid, i) => {
     const lang = i === 0 ? state.src : state.dst;
-    const g = document.getElementById(gid);
-    g.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+    document.getElementById(gid).querySelectorAll('.lang-btn')
+      .forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
   });
+  const inputText = document.getElementById('inputText');
+  const outputText = document.getElementById('outputText');
   [inputText.value, outputText.value] = [outputText.value, inputText.value];
   updateCharCount();
   updateLabels();
   scheduleTranslate();
 });
 
-// ── translate ──
+// ── Translate ─────────────────────────────────────────────
+const inputText    = document.getElementById('inputText');
+const outputText   = document.getElementById('outputText');
+const translateBtn = document.getElementById('translateBtn');
+const statusEl     = document.getElementById('status');
+
 async function doTranslate() {
   const text = inputText.value.trim();
   if (!text || state.busy) return;
@@ -339,31 +390,31 @@ async function doTranslate() {
   setStatus('loading', '⟳ translating…');
   outputText.value = '';
 
-  const key = `${state.src}→${state.dst}`;
-  const sysPrompt = SYSTEM_PROMPTS[key] || `Translate to ${LANG_NAMES[state.dst]}. Output ONLY the translation.`;
-
   try {
-    const res = await fetch(API_URL, {
+    const res = await fetch('/api/translate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'qwen',
-        messages: [
-          { role: 'system', content: sysPrompt },
-          { role: 'user',   content: text }
-        ],
-        max_tokens: 1024,
-        temperature: 0.1,
-      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Access-Key': state.key,
+      },
+      body: JSON.stringify({ text, source: state.src, target: state.dst }),
     });
+
+    if (res.status === 401) {
+      setStatus('error', '✗ Session expired — please re-enter access key');
+      localStorage.removeItem(STORAGE_KEY);
+      state.key = '';
+      gate.classList.remove('hidden');
+      return;
+    }
+
     const data = await res.json();
-    const result = data?.choices?.[0]?.message?.content?.trim();
-    if (result) {
-      outputText.value = result;
+    if (data.translation) {
+      outputText.value = data.translation;
       updateCharCount();
       setStatus('ok', '✓ done');
     } else {
-      setStatus('error', '✗ empty response');
+      setStatus('error', `✗ ${data.error || 'Unknown error'}`);
     }
   } catch (err) {
     setStatus('error', `✗ ${err.message}`);
@@ -384,20 +435,19 @@ function scheduleTranslate() {
 }
 inputText.addEventListener('input', () => { updateCharCount(); scheduleTranslate(); });
 
-// ── utils ──
+// ── Utils ─────────────────────────────────────────────────
 function updateCharCount() {
-  charIn.textContent  = inputText.value.length;
-  charOut.textContent = outputText.value.length;
+  document.getElementById('charIn').textContent  = inputText.value.length;
+  document.getElementById('charOut').textContent = outputText.value.length;
 }
 function setStatus(cls, msg) {
   statusEl.className = `status ${cls}`;
   statusEl.textContent = msg;
 }
-
 function setupCopy(btnId, getVal) {
   document.getElementById(btnId).addEventListener('click', async () => {
     const t = getVal(); if (!t) return;
-    try { await navigator.clipboard.writeText(t); } catch { /* fallback */ }
+    try { await navigator.clipboard.writeText(t); } catch {}
     const btn = document.getElementById(btnId);
     btn.textContent = 'COPIED ✓'; btn.classList.add('copied');
     setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1500);
