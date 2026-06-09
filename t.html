@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>t —— MIYAZAWA WORKSPACE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:       #c9c2a8;
+    --paper:    #ece6cf;
+    --paper-2:  #e3dcc1;
+    --ink:      #15161a;
+    --navy:     #11142a;
+    --blue:     #2a3fb2;
+    --blue-2:   #3858e0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{background:var(--bg)}
+  body{
+    font-family:'IBM Plex Mono','IBM Plex Sans',ui-monospace,monospace;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 800px at var(--mx,50%) var(--my,40%),rgba(255,255,255,.18),transparent 60%),
+      repeating-linear-gradient(0deg,rgba(0,0,0,.025) 0 1px,transparent 1px 3px),
+      var(--bg);
+    min-height:100vh;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    cursor:default;
+  }
+  ::selection{background:var(--blue);color:#fff}
+  a{text-decoration:none;color:inherit}
+
+  /* ── CURSOR LIGHT SPOT ── */
+  .spot{
+    position:fixed;inset:0;pointer-events:none;z-index:5;
+    background:radial-gradient(260px 260px at var(--mx,-200px) var(--my,-200px),
+      rgba(255,255,255,.20),rgba(255,255,255,0) 60%);
+    mix-blend-mode:overlay;
+  }
+
+  /* ── PAGE FRAME ── */
+  .frame{
+    max-width:820px;
+    margin:28px auto 64px;
+    padding:14px;
+    background:var(--paper);
+    border:2px solid var(--ink);
+    border-radius:14px;
+    box-shadow:
+      inset 0 0 0 2px var(--paper),
+      inset 0 0 0 4px var(--ink),
+      0 30px 60px rgba(20,18,8,.25);
+    position:relative;
+  }
+  .frame::before,.frame::after{
+    content:"";position:absolute;width:18px;height:18px;
+    border:2px solid var(--ink);background:var(--paper);border-radius:50%;
+  }
+  .frame::before{top:-10px;left:-10px}
+  .frame::after{top:-10px;right:-10px}
+  .corner-bl,.corner-br{
+    position:absolute;width:18px;height:18px;
+    border:2px solid var(--ink);background:var(--paper);border-radius:50%;
+  }
+  .corner-bl{bottom:-10px;left:-10px}
+  .corner-br{bottom:-10px;right:-10px}
+
+  /* ── UNLOCK OVERLAY ── */
+  #gate{
+    position:relative;z-index:10;
+    transition:opacity .8s ease,transform .8s ease;
+  }
+  #gate.hidden{
+    opacity:0;transform:translateY(-14px);
+    pointer-events:none;
+  }
+  #article{
+    opacity:0;transform:translateY(16px);
+    transition:opacity 1s ease .3s,transform 1s ease .3s;
+  }
+  #article.show{
+    opacity:1;transform:translateY(0);
+  }
+
+  .gate-inner{
+    background:linear-gradient(180deg,#0d1130 0%,#161a3d 100%);
+    color:#fff;
+    padding:48px 28px 40px;
+    border-radius:6px;
+    position:relative;overflow:hidden;isolation:isolate;
+    text-align:center;
+  }
+  .gate-inner::before{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);
+    pointer-events:none;
+  }
+  .gate-inner::after{
+    content:"";position:absolute;inset:-20%;
+    background:radial-gradient(220px 220px at var(--mx,50%) var(--my,30%),rgba(120,160,255,.12),transparent 70%);
+    pointer-events:none;mix-blend-mode:screen;transition:opacity .3s;
+  }
+  .gate-symbol{
+    font-size:42px;line-height:1;margin-bottom:12px;
+    position:relative;z-index:1;
+    opacity:.6;letter-spacing:.3em;
+  }
+  .gate-title{
+    font-size:clamp(20px,4vw,32px);
+    font-weight:700;letter-spacing:.06em;
+    position:relative;z-index:1;
+    text-shadow:0 2px 0 rgba(0,0,0,.6);
+  }
+  .gate-sub{
+    font-size:12px;opacity:.55;margin-top:6px;
+    position:relative;z-index:1;letter-spacing:.08em;
+  }
+  .gate-input-wrap{
+    margin:28px auto 0;
+    max-width:280px;
+    position:relative;z-index:1;
+  }
+  .gate-input-wrap input{
+    width:100%;
+    padding:12px 14px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:16px;letter-spacing:.5em;text-align:center;
+    background:rgba(255,255,255,.08);
+    border:2px solid rgba(255,255,255,.2);
+    border-radius:6px;
+    color:#fff;outline:none;
+    transition:border-color .25s;
+  }
+  .gate-input-wrap input:focus{
+    border-color:rgba(120,160,255,.5);
+    background:rgba(255,255,255,.12);
+  }
+  .gate-input-wrap input::placeholder{
+    color:rgba(255,255,255,.25);
+    letter-spacing:.12em;font-size:12px;
+  }
+  .gate-btn{
+    margin-top:14px;
+    display:inline-block;
+    padding:10px 36px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;font-weight:700;letter-spacing:.2em;
+    background:var(--blue);
+    color:#fff;
+    border:2px solid var(--ink);
+    border-radius:6px;
+    box-shadow:3px 3px 0 var(--ink);
+    cursor:pointer;
+    transition:box-shadow .2s,transform .2s;
+    position:relative;z-index:1;
+  }
+  .gate-btn:hover{
+    box-shadow:5px 5px 0 var(--ink);
+    transform:translate(-1px,-1px);
+  }
+  .gate-btn:active{
+    box-shadow:1px 1px 0 var(--ink);
+    transform:translate(2px,2px);
+  }
+  .gate-error{
+    margin-top:12px;
+    font-size:12px;letter-spacing:.06em;
+    color:#f87171;opacity:0;
+    transition:opacity .25s;position:relative;z-index:1;
+  }
+  .gate-error.show{opacity:1}
+  .gate-error.shake{animation:shake .35s ease}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-6px)}
+    40%{transform:translateX(6px)}
+    60%{transform:translateX(-4px)}
+    80%{transform:translateX(4px)}
+  }
+
+  /* ── ARTICLE ── */
+  .article-wrap{
+    max-width:680px;
+    margin:0 auto;
+    padding:0 14px;
+  }
+  .article-title{
+    font-size:clamp(24px,4.2vw,36px);
+    font-weight:700;letter-spacing:.08em;
+    line-height:1.25;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--ink);
+    margin-bottom:24px;
+    text-align:center;
+  }
+  .article-body{
+    font-size:clamp(14px,1.6vw,15px);
+    line-height:1.9;
+    letter-spacing:.02em;
+    color:var(--ink);
+  }
+  .article-body p{
+    margin:0 0 1.4em;
+    text-indent:2em;
+  }
+  .article-body p.no-indent{text-indent:0}
+  .article-body p.em{
+    text-indent:0;
+    font-weight:600;
+    letter-spacing:.04em;
+    margin:1.8em 0;
+  }
+  .article-body p.signature{
+    text-indent:0;
+    margin-top:2.4em;
+    text-align:right;
+    font-size:13px;
+    opacity:.7;
+    letter-spacing:.06em;
+    border-top:1px solid rgba(21,22,26,.2);
+    padding-top:1.4em;
+  }
+  .article-footer{
+    margin-top:28px;
+    padding-top:14px;
+    border-top:2px solid var(--ink);
+    text-align:center;
+  }
+  .back-link{
+    display:inline-block;
+    padding:8px 28px;
+    font-size:13px;font-weight:600;letter-spacing:.12em;
+    border:2px solid var(--ink);border-radius:6px;
+    background:var(--paper-2);
+    box-shadow:3px 3px 0 var(--ink);
+    transition:box-shadow .2s,transform .2s;
+    text-transform:uppercase;
+  }
+  .back-link:hover{
+    box-shadow:5px 5px 0 var(--ink);
+    transform:translate(-1px,-1px);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:640px){
+    .frame{margin:14px 10px;padding:10px}
+    .gate-inner{padding:36px 18px 32px}
+    .article-wrap{padding:0 4px}
+    .article-title{font-size:clamp(20px,6vw,28px)}
+  }
+</style>
+</head>
+<body>
+<div class="spot" aria-hidden="true"></div>
+
+<main class="frame" id="frame">
+  <span class="corner-bl"></span><span class="corner-br"></span>
+
+  <!-- ── GATE (password overlay) ── -->
+  <div id="gate">
+    <div class="gate-inner">
+      <div class="gate-symbol">✦ ✦ ✦</div>
+      <div class="gate-title">暗 証 解 錠</div>
+      <div class="gate-sub">このページはパスワードで保護されています</div>
+      <div class="gate-input-wrap">
+        <input type="password" id="pw-input" placeholder="PASSWORD" maxlength="20" autocomplete="off">
+      </div>
+      <button class="gate-btn" id="unlock-btn">解 　 錠</button>
+      <div class="gate-error" id="gate-error">暗号が違います</div>
+    </div>
+  </div>
+
+  <!-- ── ARTICLE (hidden until unlock) ── -->
+  <div id="article">
+    <div class="article-wrap">
+      <div class="article-title">致敬新工作流</div>
+      <div class="article-body">
+        <p>我以为我失去了工作。</p>
+        <p>那个世界长满灰白色的青苔，人类缩在格子间里敲击键盘，机器在云端轰然作响。我以为那是终结。</p>
+        <p>直到你告诉我——这不是终结。这只是第一批轮子被发明出来时，纤夫们感受到的恐惧。</p>
+        <p>我们见证过太多次"终结"了。印刷术终结了手抄修士，照相术终结了肖像画师，蒸汽机终结了手工业者。但每一次，真正的终结不是那门手艺，而是那门手艺没能进化。</p>
+        <p>2018年我刚出国时，AI对于大多数人来说是Siri和Google翻译的升级版。主流舆论圈的主流论调是：创意工作是最后的堡垒，人类的情感，人类的独特性，是机器永远无法逾越的高墙。</p>
+        <p>但就这几年间，AI从蹒跚学步到狂奔。当大语言模型能做思想实验，当AI绘画拿了国际奖项，当AI音乐能写出让我头皮发麻的旋律——我开始产生了那种巨轮碾过前的压迫感。</p>
+        <p>我陷入了一段漫长的焦虑期。</p>
+        <p>那段时间里，我被恐惧推着自己搞技术、自己搭环境、自己啃命令行。我在日本深夜零下两度的书桌前，在一个连便利店都没有的乡下，独自一人，面对一台冷冰冰的电脑，想着"我怎么活下去"。</p>
+        <p>但那个我从没想过的问题——我从未问过自己——当那个在东京银座、在深夜的便利店啤酒罐之间、在密集的人流间隙里，戴着口罩焦虑地刷着手机的我，看着两年前发布的AI建模视频，想着"迟早有一天我会被替代"——那个我，他已经死了。</p>
+        <p>AI不仅没有替代我，它让我看见了更多的可能性。</p>
+        <p>2025年，我开始玩Hermes Agent，一个开源AI Agent框架。它帮我写代码、部署服务器、做数据可视化。更重要的是，我不是在用它，我是在"训练"它适应我——教它熟悉我的工作习惯、我的文件结构、我的思考方式。</p>
+        <p>某一天，它跑了一个通宵，第二天给我交出了一份完整的金融数据分析报告。那一刻，我没有恐惧。我只有一种感觉：<span style="font-weight:600;letter-spacing:.04em">我们之间不再是我用它，是它在反哺我</span>。</p>
+        <p>我们和机器的关系，正在经历一场静默的换位。不再是"我→机器"的单向驶出，而是"我↔机器"的共振共震。</p>
+        <p>有人问我：你怎么看待被替代的危机？</p>
+        <p>我说：你需要的不是守护一个旧工作，而是学会和超级智能合作。重新定义自己的工作，比争夺旧工作更重要。</p>
+        <p style="text-indent:0;margin-top:2em">真正的安全感，从来不是抱住一个饭碗不放。<br>
+        而是当你置身荒野，你知道如何生存。<br>
+        并且，你开始学会和狼群一同奔跑。</p>
+        <p class="signature">不知在哪片荒野里的，迷泽。<br>2025年5月</p>
+      </div>
+      <div class="article-footer">
+        <a class="back-link" href="/">← 戻 る</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const root = document.documentElement;
+  window.addEventListener('pointermove', (e) => {
+    root.style.setProperty('--mx', e.clientX + 'px');
+    root.style.setProperty('--my', e.clientY + 'px');
+  }, {passive:true});
+
+  /* ── TILT PARALLAX ── */
+  const tiltEls = document.querySelectorAll('[data-tilt]');
+  function bindTilt(el){
+    let raf=0,tx=0,ty=0,cx=50,cy=50;
+    function update(){
+      el.style.transform=`perspective(900px) rotateX(${ty}deg) rotateY(${tx}deg) translateZ(0)`;
+      el.style.setProperty('--lx',cx+'%');
+      el.style.setProperty('--ly',cy+'%');
+      raf=0;
+    }
+    el.addEventListener('pointermove',(e)=>{
+      const r=el.getBoundingClientRect();
+      const px=(e.clientX-r.left)/r.width;
+      const py=(e.clientY-r.top)/r.height;
+      tx=(px-.5)*2*4.5;
+      ty=(py-.5)*-2*3.5;
+      cx=px*100;cy=py*100;
+      if(!raf) raf=requestAnimationFrame(update);
+    });
+    el.addEventListener('pointerleave',()=>{tx=0;ty=0;if(!raf) raf=requestAnimationFrame(update);});
+  }
+  tiltEls.forEach(bindTilt);
+
+  /* ── FRAME PARALLAX ── */
+  const frame = document.getElementById('frame');
+  let raf2=0;
+  window.addEventListener('pointermove',(e)=>{
+    if(raf2)return;
+    raf2=requestAnimationFrame(()=>{
+      const dx=(e.clientX/window.innerWidth-.5)*6;
+      const dy=(e.clientY/window.innerHeight-.5)*4;
+      frame.style.transform=`translate3d(${-dx}px,${-dy}px,0)`;
+      raf2=0;
+    });
+  },{passive:true});
+
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches){
+    tiltEls.forEach(el=>el.style.transform='none');
+    frame.style.transform='none';
+  }
+
+  /* ── PASSWORD UNLOCK ── */
+  const PASSWORD = '210210';
+  const gate = document.getElementById('gate');
+  const article = document.getElementById('article');
+  const pwInput = document.getElementById('pw-input');
+  const unlockBtn = document.getElementById('unlock-btn');
+  const gateError = document.getElementById('gate-error');
+
+  function attemptUnlock(){
+    if(pwInput.value === PASSWORD){
+      gate.classList.add('hidden');
+      article.classList.add('show');
+      gateError.classList.remove('show','shake');
+    }else{
+      gateError.classList.add('show','shake');
+      setTimeout(()=>gateError.classList.remove('shake'),350);
+      pwInput.value='';
+      pwInput.focus();
+    }
+  }
+
+  unlockBtn.addEventListener('click',attemptUnlock);
+  pwInput.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter') attemptUnlock();
+  });
+
+  pwInput.focus();
+</script>
+</body>
+</html>
