@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HERMES AGENT + GROK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:           #c9c2a8;       /* warm beige page */
+    --paper:        #ece6cf;       /* card body cream */
+    --paper-2:      #e3dcc1;       /* alt body */
+    --ink:          #15161a;       /* near-black */
+    --ink-soft:     #2a2b30;
+    --navy:         #11142a;       /* header bar */
+    --navy-2:       #1d2350;
+    --blue:         #2a3fb2;       /* accents */
+    --blue-2:       #3858e0;
+    --rule:         #1a1c22;
+    --bevel-hi:     #ffffff;
+    --bevel-lo:     #6b6750;
+    --bevel-lo-2:   #3a3826;
+    --yellow:       #f4c441;
+    --red:          #c64a3a;
+    --green:        #4a8a47;
+    --pink:         #e9a7a4;
+    --shadow:       0 6px 0 rgba(0,0,0,.18), 0 16px 28px rgba(20,18,8,.18);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{ background:var(--bg); }
+  body{
+    font-family:'IBM Plex Mono', 'IBM Plex Sans', ui-monospace, monospace;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 800px at var(--mx,50%) var(--my,40%), rgba(255,255,255,.18), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,.025) 0 1px, transparent 1px 3px),
+      var(--bg);
+    min-height:100vh;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    cursor:default;
+  }
+
+  /* ─────────── PAGE FRAME ─────────── */
+  .frame{
+    max-width: 1180px;
+    margin: 28px auto 64px;
+    padding: 14px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    box-shadow:
+      inset 0 0 0 2px var(--paper),
+      inset 0 0 0 4px var(--ink),
+      0 30px 60px rgba(20,18,8,.25);
+    position:relative;
+  }
+  /* outer rounded notch corners like the image */
+  .frame::before,.frame::after{
+    content:""; position:absolute; width:18px; height:18px;
+    border:2px solid var(--ink); background:var(--paper);
+    border-radius:50%;
+  }
+  .frame::before{top:-10px; left:-10px}
+  .frame::after{top:-10px; right:-10px}
+  .frame > .corner-bl,.frame > .corner-br{
+    content:""; position:absolute; width:18px; height:18px;
+    border:2px solid var(--ink); background:var(--paper);
+    border-radius:50%;
+  }
+  .frame > .corner-bl{bottom:-10px;left:-10px}
+  .frame > .corner-br{bottom:-10px;right:-10px}
+
+  /* ─────────── HEADER ─────────── */
+  .hero{
+    background:
+      linear-gradient(180deg, #0d1130 0%, #161a3d 100%);
+    color:#fff;
+    padding: 26px 28px 22px;
+    border-radius:6px;
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .hero::before{
+    /* subtle scanlines */
+    content:""; position:absolute; inset:0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 1px, transparent 1px 3px);
+    pointer-events:none;
+  }
+  .hero::after{
+    content:""; position:absolute; inset:-20%;
+    background: radial-gradient(220px 220px at var(--mx,50%) var(--my,30%), rgba(120,160,255,.18), transparent 70%);
+    pointer-events:none; mix-blend-mode:screen;
+    transition:opacity .3s;
+  }
+  .hero-row{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:24px;
+    position:relative; z-index:1;
+  }
+  h1.title{
+    font-family:'IBM Plex Mono','IBM Plex Sans',monospace;
+    font-weight:700;
+    letter-spacing:.06em;
+    margin:0;
+    font-size: clamp(28px, 5.4vw, 60px);
+    line-height:1;
+    text-shadow: 0 2px 0 rgba(0,0,0,.6), 0 0 18px rgba(120,150,255,.25);
+  }
+  h1 .plus{ color:#fff; opacity:.95; padding:0 .15em; }
+  .byline{
+    font-size: clamp(11px, 1.4vw, 14px);
+    opacity:.85;
+    white-space:nowrap;
+    margin-top:6px;
+  }
+  .subtitle{
+    margin: 14px 0 6px;
+    font-size: clamp(13px, 1.8vw, 19px);
+    opacity:.95;
+    letter-spacing:.02em;
+  }
+  .meta{
+    font-size: clamp(11px, 1.4vw, 14px);
+    opacity:.75;
+    letter-spacing:.02em;
+  }
+  .dot{opacity:.45; padding:0 6px}
+
+  /* ─────────── PANELS ─────────── */
+  .grid{
+    display:grid; gap:14px; margin-top:14px;
+  }
+  .grid.two{ grid-template-columns: 1fr 1fr; }
+  .grid.three{ grid-template-columns: repeat(3, 1fr); }
+  .grid.four{ grid-template-columns: repeat(4, 1fr); }
+
+  .panel{
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    box-shadow: 3px 3px 0 var(--ink);
+    overflow:hidden;
+    transform-style:preserve-3d;
+    transition: transform .25s ease, box-shadow .25s ease;
+    will-change: transform;
+    position:relative;
+  }
+  .panel:hover{ box-shadow: 5px 5px 0 var(--ink); }
+  .panel .head{
+    background: linear-gradient(180deg, #2236a8, #1a2887);
+    color:#fff;
+    padding: 8px 12px;
+    display:flex; align-items:center; gap:10px;
+    font-weight:600;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-size: 14px;
+    border-bottom:2px solid var(--ink);
+    position:relative;
+  }
+  .panel .head::after{
+    /* subtle highlight on head */
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(255,255,255,.18), transparent 40%);
+    pointer-events:none;
+  }
+  .panel .body{ padding: 14px 16px; }
+
+  ul.list{
+    list-style:none; margin:0; padding:0;
+    font-size:14px; line-height:1.55;
+  }
+  ul.list li{
+    padding-left: 18px;
+    position:relative;
+    margin: 4px 0;
+  }
+  ul.list li::before{
+    content:"•";
+    position:absolute; left:4px; top:0; color:var(--ink);
+    font-weight:700;
+  }
+
+  /* iconography (squares with emoji-ish glyphs) */
+  .ico{
+    width:24px; height:24px; flex:0 0 24px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:1.5px solid var(--ink);
+    background:#fff;
+    border-radius:4px;
+    font-size:14px;
+    line-height:1;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
+  }
+  .ico.lg{ width:42px; height:42px; flex-basis:42px; font-size:22px; border-radius:6px; }
+  .ico.bot{ background:#e9eef9 }
+  .ico.zap{ background:#fff3bf; color:#a37b00 }
+  .ico.pc { background:#cfd2da }
+  .ico.key{ background:#fff }
+  .ico.star{ background:#fff5cc }
+  .ico.bulb{ background:#fff5cc }
+  .ico.globe{ background:#cfe0ff }
+
+  /* requirement squares */
+  .req{
+    display:flex; align-items:center; gap:14px;
+    padding:12px;
+    background:#efe9d2;
+    border:2px solid var(--ink);
+    border-radius:6px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .req .sq{
+    width:54px; height:54px; flex:0 0 54px;
+    display:flex; align-items:center; justify-content:center;
+    border:2px solid var(--ink); border-radius:6px;
+    font-weight:700; color:#fff;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.15);
+  }
+  .req.x  .sq{ background:#0b0b0e; }
+  .req.py .sq{ background:#2a5db0; }
+  .req.pc .sq{ background:#7d7460; }
+  .req.doc .sq{ background:#e6e2d2; color:var(--ink); border:2px solid var(--ink);}
+  .req .label{ font-size:14px; line-height:1.3; }
+  .req .label b{ display:block; font-weight:700 }
+
+  /* steps */
+  .steps{ display:flex; flex-direction:column; }
+  .step{
+    display:grid;
+    grid-template-columns: 60px 70px 1fr;
+    align-items:center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-top:1.5px solid var(--ink);
+    background: var(--paper-2);
+  }
+  .step:nth-child(odd){ background: #e9e2c6 }
+  .step:first-child{ border-top:0 }
+  .num{
+    background: var(--blue);
+    color:#fff;
+    font-weight:700;
+    font-size: 30px;
+    width:54px; height:54px;
+    display:flex; align-items:center; justify-content:center;
+    border:2px solid var(--ink); border-radius:6px;
+    box-shadow: 2px 2px 0 var(--ink);
+    text-shadow: 0 1px 0 rgba(0,0,0,.35);
+  }
+  .step-ico{
+    width:44px; height:44px;
+    display:flex; align-items:center; justify-content:center;
+    background:#fff; border:2px solid var(--ink); border-radius:6px;
+    font-size:22px;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .step .what{
+    display:grid; grid-template-columns: 220px 1fr; gap: 18px; align-items:center;
+  }
+  .step .what b{
+    letter-spacing:.12em; text-transform:uppercase; font-size:14px;
+  }
+  .step .what code, .step .what .cmd{
+    font-family:'IBM Plex Mono',monospace;
+    font-size: 14px;
+    color:var(--ink);
+    word-break:break-all;
+    background: transparent;
+  }
+  .step .what .cmd em{ font-style:normal; color:#2a3fb2; font-weight:600 }
+
+  .note{
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 14px;
+    border-top:1.5px solid var(--ink);
+    background: #ddd4b3;
+    font-size:13.5px; font-style:italic;
+  }
+  .note .ico{ background:#e6e2d2 }
+
+  /* power cards */
+  .power{
+    background:#efe9d2;
+    border:2px solid var(--ink); border-radius:6px;
+    padding: 12px;
+    display:flex; gap:12px; align-items:center;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .power .pic{
+    width:54px; height:54px; flex:0 0 54px;
+    display:flex; align-items:center; justify-content:center;
+    background:#fff; border:2px solid var(--ink); border-radius:8px;
+    font-size:30px;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .power .pic.brain{ background:#f6c9c4 }
+  .power .pic.lens { background:#e8eaef }
+  .power .pic.image{ background:#cfe2cf }
+  .power .pic.audio{ background:#cfd9ef }
+  .power .pic.case { background:#e0a16b }
+  .power .pic.disk { background:#d6d2c2 }
+  .power b{ font-size:14px; letter-spacing:.04em }
+  .power small{ display:block; font-size:13px; opacity:.85; line-height:1.45 }
+
+  /* why grid */
+  .why{
+    background:#efe9d2; border:2px solid var(--ink); border-radius:6px;
+    padding: 14px 18px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .why ul{ columns: 2; column-gap: 28px; margin:0; padding:0; list-style:none; font-size:14px; line-height:1.6 }
+  .why li{ break-inside: avoid; padding-left:18px; position:relative; margin:4px 0 }
+  .why li::before{ content:"•"; position:absolute; left:4px; top:0; font-weight:700 }
+  .why b{ font-weight:700 }
+
+  /* pro tips */
+  .tips{
+    background:#efe9d2; border:2px solid var(--ink); border-radius:6px;
+    padding: 14px 18px;
+    box-shadow: 3px 3px 0 var(--ink);
+    font-size:14px;
+    display:grid; grid-template-columns: 1fr 1fr; gap: 6px 32px;
+  }
+  .tips code{ font-family:'IBM Plex Mono',monospace; font-weight:600 }
+  .tips .arrow{ color:#2a3fb2; padding: 0 4px }
+
+  /* links footer */
+  .links{
+    margin-top:14px; padding: 14px 18px;
+    display:grid; gap:6px; font-size:14px;
+    background: transparent;
+  }
+  .links .row{ display:flex; align-items:center; gap:12px }
+  .links .ico{ background:#e9e3cc }
+  .links a{ color:var(--ink); text-decoration:none; border-bottom:1px dotted rgba(0,0,0,.4) }
+  .links a:hover{ color:var(--blue); border-bottom-color:var(--blue) }
+
+  /* footer bar */
+  .footer{
+    margin-top: 14px;
+    background: linear-gradient(180deg, #0d1130 0%, #161a3d 100%);
+    color:#fff;
+    border-radius:6px;
+    padding: 12px 18px;
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:14px; letter-spacing:.04em;
+  }
+  .footer .left{ display:flex; align-items:center; gap:10px }
+  .footer .ico{ background:#cfd2da; color:var(--ink) }
+
+  /* sub-banner row (5-step setup header) */
+  .strip-head{
+    background: linear-gradient(180deg, #2236a8, #1a2887);
+    color:#fff;
+    border:2px solid var(--ink); border-radius:6px 6px 0 0;
+    padding: 8px 14px;
+    display:flex; align-items:center; gap:10px;
+    text-transform:uppercase; letter-spacing:.12em; font-weight:600; font-size:14px;
+    box-shadow: 3px 0 0 var(--ink);
+    border-bottom:0;
+  }
+  .strip-body{
+    border:2px solid var(--ink); border-top:0; border-radius:0 0 6px 6px;
+    background:var(--paper-2);
+    box-shadow: 3px 3px 0 var(--ink);
+    overflow:hidden;
+  }
+
+  /* mouse cursor light spot (global) */
+  .spot{
+    position:fixed; inset:0; pointer-events:none; z-index:5;
+    background: radial-gradient(260px 260px at var(--mx,-200px) var(--my,-200px),
+                rgba(255,255,255,.20), rgba(255,255,255,0) 60%);
+    mix-blend-mode: overlay;
+  }
+
+  /* card sheen following cursor */
+  .panel::after, .req::after, .power::after, .why::after, .tips::after{
+    content:""; position:absolute; inset:0; border-radius:inherit;
+    background: radial-gradient(180px 180px at var(--lx,50%) var(--ly,50%),
+                rgba(255,255,255,.35), rgba(255,255,255,0) 60%);
+    opacity:0; transition:opacity .25s; pointer-events:none;
+    mix-blend-mode: soft-light;
+  }
+  .panel:hover::after, .req:hover::after, .power:hover::after,
+  .why:hover::after, .tips:hover::after{ opacity:1; }
+
+  .req, .power, .why, .tips{ position:relative; overflow:hidden }
+
+  /* command code block */
+  .cmd-wrap{
+    background:transparent;
+  }
+  .cmd-wrap .cmd{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13.5px;
+    color:var(--ink);
+    word-break:break-all;
+    line-height:1.5;
+  }
+
+  /* small uppercase chip */
+  .kbd{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+  }
+
+  /* responsive */
+  @media (max-width: 980px){
+    .grid.two, .grid.three, .grid.four{ grid-template-columns: 1fr 1fr; }
+    .why ul{ columns: 1 }
+    .tips{ grid-template-columns: 1fr; }
+    .step{ grid-template-columns: 50px 56px 1fr; gap:10px; padding:12px 12px }
+    .step .what{ grid-template-columns: 1fr; gap: 4px }
+    .num{ width:46px; height:46px; font-size:24px }
+    .step-ico{ width:38px; height:38px; font-size:18px }
+  }
+  @media (max-width: 640px){
+    .frame{ margin:14px 10px; padding:10px }
+    .hero{ padding: 20px 18px }
+    .grid.two, .grid.three, .grid.four{ grid-template-columns: 1fr; }
+    .hero-row{ flex-direction:column; gap:6px }
+    .byline{ align-self:flex-end }
+    .footer{ flex-direction:column; gap:6px; align-items:flex-start }
+  }
+
+  /* selection */
+  ::selection{ background: var(--blue); color:#fff }
+</style>
+</head>
+<body>
+  <div class="spot" aria-hidden="true"></div>
+
+  <main class="frame" id="frame">
+    <span class="corner-bl"></span><span class="corner-br"></span>
+
+    <!-- ───────── HERO ───────── -->
+    <section class="hero" data-tilt>
+      <div class="hero-row">
+        <h1 class="title">HERMES&nbsp;AGENT&nbsp;<span class="plus">+</span>&nbsp;GROK</h1>
+        <div class="byline">@Andreas</div>
+      </div>
+      <div class="subtitle">Personal · Self-Improving · Real-Time X Superpowers</div>
+      <div class="meta">Open-source · Persistent · No API keys · Announced May 15–16, 2026</div>
+    </section>
+
+    <!-- ───────── TWO COLUMNS ───────── -->
+    <div class="grid two">
+      <article class="panel" data-tilt>
+        <header class="head"><span class="ico bot">🤖</span> What is Hermes Agent?</header>
+        <div class="body">
+          <ul class="list">
+            <li>Open-source autonomous AI agent by Nous Research (MIT)</li>
+            <li>Runs on laptop · VPS · server · Android (Termux)</li>
+            <li>Self-improving — builds long-term memory, learns your projects, auto-generates new skills</li>
+            <li>Telegram · Discord · WhatsApp · Signal automation</li>
+            <li>Code execution · web browsing · sub-agents · job scheduling</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="panel" data-tilt>
+        <header class="head"><span class="ico zap">⚡</span> The Grok Integration</header>
+        <div class="body">
+          <ul class="list">
+            <li>Direct connect to SuperGrok / X Premium+</li>
+            <li>Simple browser OAuth — no API keys, no extra billing</li>
+            <li>Zero extra cost — uses existing subscription quota</li>
+            <li>Full Grok real-time capabilities inside Hermes</li>
+            <li>Live X search with citations</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <!-- ───────── REQUIREMENTS ───────── -->
+    <div style="margin-top:14px">
+      <div class="strip-head"><span class="ico pc">🖥️</span> Requirements</div>
+      <div class="strip-body" style="padding:14px">
+        <div class="grid four">
+          <div class="req x" data-tilt>
+            <div class="sq">X</div>
+            <div class="label"><b>SuperGrok</b><span>or X Premium+</span></div>
+          </div>
+          <div class="req py" data-tilt>
+            <div class="sq">py</div>
+            <div class="label"><b>Python 3.9+</b><span>&nbsp;</span></div>
+          </div>
+          <div class="req pc" data-tilt>
+            <div class="sq">💻</div>
+            <div class="label"><b>Local machine</b><span>or VPS</span></div>
+          </div>
+          <div class="req doc" data-tilt>
+            <div class="sq">📄</div>
+            <div class="label"><b>Latest Hermes</b><span>installed</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────── 5-STEP SETUP ───────── -->
+    <div style="margin-top:14px">
+      <div class="strip-head"><span class="ico key">🛠️</span> 5-Step Setup</div>
+      <div class="strip-body">
+        <div class="steps">
+          <div class="step" data-tilt>
+            <div class="num">1</div>
+            <div class="step-ico">📦</div>
+            <div class="what">
+              <b>Install Hermes</b>
+              <span class="cmd">curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash</span>
+            </div>
+          </div>
+          <div class="step" data-tilt>
+            <div class="num">2</div>
+            <div class="step-ico">▶️</div>
+            <div class="what">
+              <b>Choose Grok</b>
+              <span class="cmd">Run: <em>hermes model</em></span>
+            </div>
+          </div>
+          <div class="step" data-tilt>
+            <div class="num">3</div>
+            <div class="step-ico">🔑</div>
+            <div class="what">
+              <b>Select OAuth</b>
+              <span class="cmd">Pick: <em>xAI Grok OAuth (SuperGrok Subscription)</em></span>
+            </div>
+          </div>
+          <div class="step" data-tilt>
+            <div class="num">4</div>
+            <div class="step-ico">🔒</div>
+            <div class="what">
+              <b>Sign In</b>
+              <span class="cmd">Browser opens → log in at accounts.x.ai → approve access</span>
+            </div>
+          </div>
+          <div class="step" data-tilt>
+            <div class="num">5</div>
+            <div class="step-ico">💬</div>
+            <div class="what">
+              <b>Start Chatting</b>
+              <span class="cmd"><em>hermes --tui</em> (or connect messaging apps)</span>
+            </div>
+          </div>
+          <div class="note"><span class="ico">🗒️</span><em>Remote/VPS:</em>&nbsp;hermes auth add xai-oauth --no-browser + SSH tunnel</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────── SUPERPOWERS ───────── -->
+    <div style="margin-top:14px">
+      <div class="strip-head"><span class="ico star">⭐</span> Superpowers You Unlock</div>
+      <div class="strip-body" style="padding:14px">
+        <div class="grid three">
+          <div class="power" data-tilt>
+            <div class="pic brain">🧠</div>
+            <div><b>Grok 4.3</b><small>Advanced reasoning + 1M+ context</small></div>
+          </div>
+          <div class="power" data-tilt>
+            <div class="pic lens">🔍</div>
+            <div><b>X Search</b><small>Real-time posts with citations</small></div>
+          </div>
+          <div class="power" data-tilt>
+            <div class="pic image">🖼️</div>
+            <div><b>Grok Imagine</b><small>Image + video generation</small></div>
+          </div>
+          <div class="power" data-tilt>
+            <div class="pic audio">🔊</div>
+            <div><b>Text-to-Speech</b><small>Natural voice responses</small></div>
+          </div>
+          <div class="power" data-tilt>
+            <div class="pic case">🧰</div>
+            <div><b>Tool use + caching</b><small>Full streaming support</small></div>
+          </div>
+          <div class="power" data-tilt>
+            <div class="pic disk">💾</div>
+            <div><b>Persistent memory</b><small>Learns from you · never forgets</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────── WHY IT CHANGES EVERYTHING ───────── -->
+    <div style="margin-top:14px">
+      <div class="strip-head"><span class="ico globe">🌐</span> Why This Changes Everything</div>
+      <div class="strip-body" style="padding:14px">
+        <div class="why" data-tilt>
+          <ul>
+            <li><b>Best of both:</b> Hermes autonomy + Grok live data</li>
+            <li><b>Private, local-first</b> — never forgets you</li>
+            <li><b>Zero API costs</b> — subscription already paid</li>
+            <li><b>Runs 24/7</b>, learns from you forever</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────── PRO TIPS ───────── -->
+    <div style="margin-top:14px">
+      <div class="strip-head"><span class="ico bulb">💡</span> Pro Tips + Commands</div>
+      <div class="strip-body" style="padding:14px">
+        <div class="tips" data-tilt>
+          <div><code>hermes tools</code> <span class="arrow">→</span> enable X Search / Imagine / TTS</div>
+          <div><code>hermes doctor</code> <span class="arrow">→</span> check status</div>
+          <div><code>hermes auth add xai-oauth</code> <span class="arrow">→</span> re-login</div>
+          <div><code>hermes model</code> <span class="arrow">→</span> switch models anytime</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────── LINKS ───────── -->
+    <div class="links">
+      <div class="row"><span class="ico">📑</span><a href="https://x.ai/news/grok-hermes" target="_blank" rel="noopener">x.ai/news/grok-hermes</a></div>
+      <div class="row"><span class="ico">📘</span><a href="https://hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth" target="_blank" rel="noopener">hermes-agent.nousresearch.com/docs/guides/xai-grok-oauth</a></div>
+      <div class="row"><span class="ico">🌐</span><a href="https://hermes-agent.nousresearch.com" target="_blank" rel="noopener">hermes-agent.nousresearch.com</a></div>
+    </div>
+
+    <!-- ───────── FOOTER ───────── -->
+    <footer class="footer">
+      <div class="left"><span class="ico">🖥️</span><span>Install · Auth · Run · Never stop learning</span></div>
+      <div>@Andreas</div>
+    </footer>
+  </main>
+
+<script>
+  /* ───────── Mouse interactions ───────── */
+  const root = document.documentElement;
+  const tiltEls = document.querySelectorAll('[data-tilt]');
+
+  // global cursor light + hero spotlight
+  window.addEventListener('pointermove', (e) => {
+    const x = e.clientX, y = e.clientY;
+    root.style.setProperty('--mx', x + 'px');
+    root.style.setProperty('--my', y + 'px');
+  }, {passive:true});
+
+  // per-card tilt + local sheen
+  function bindTilt(el){
+    let raf = 0;
+    let tx = 0, ty = 0;
+    let cx = 50, cy = 50;
+    let active = false;
+
+    function update(){
+      el.style.transform = `perspective(900px) rotateX(${ty}deg) rotateY(${tx}deg) translateZ(0)`;
+      el.style.setProperty('--lx', cx + '%');
+      el.style.setProperty('--ly', cy + '%');
+      raf = 0;
+    }
+
+    el.addEventListener('pointermove', (e)=>{
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;   // 0..1
+      const py = (e.clientY - r.top)  / r.height;  // 0..1
+      const maxX = 4.5, maxY = 3.5; // gentle
+      tx = (px - .5) *  2 * maxX;
+      ty = (py - .5) * -2 * maxY;
+      cx = px * 100; cy = py * 100;
+      active = true;
+      if(!raf) raf = requestAnimationFrame(update);
+    });
+
+    el.addEventListener('pointerleave', ()=>{
+      tx = 0; ty = 0; active = false;
+      if(!raf) raf = requestAnimationFrame(update);
+    });
+  }
+  tiltEls.forEach(bindTilt);
+
+  // subtle parallax for the page frame
+  const frame = document.getElementById('frame');
+  let raf = 0;
+  window.addEventListener('pointermove', (e) => {
+    if(raf) return;
+    raf = requestAnimationFrame(()=>{
+      const w = window.innerWidth, h = window.innerHeight;
+      const dx = (e.clientX / w - .5) * 6;
+      const dy = (e.clientY / h - .5) * 4;
+      frame.style.transform = `translate3d(${-dx}px, ${-dy}px, 0)`;
+      raf = 0;
+    });
+  }, {passive:true});
+
+  // reduce motion preference
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
+    tiltEls.forEach(el => el.style.transform = 'none');
+    frame.style.transform = 'none';
+  }
+</script>
+</body>
+</html>

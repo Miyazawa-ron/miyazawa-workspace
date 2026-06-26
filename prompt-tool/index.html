@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Workflow Terminal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="spot" aria-hidden="true"></div>
+
+    <main class="frame" id="frame">
+      <span class="corner-bl"></span><span class="corner-br"></span>
+
+      <div class="shell">
+        <div class="utility-bar">
+          <a class="back-link" href="/">← MIYAZAWA WORKSPACE</a>
+          <span class="utility-note">Prompt Generator / Batch Image Workflow</span>
+        </div>
+
+        <header class="topbar" data-tilt>
+          <div class="brand-block">
+            <p class="eyebrow">Controlled Prompt Product Form</p>
+            <h1>Prompt Workflow Terminal</h1>
+            <p class="brand-copy">
+              把提示词系统压成可控表单，固定风格和版式规则，只保留真正需要人工判断的少数变量。
+            </p>
+            <div class="hero-meta">
+              <span class="meta-chip">Static Tool</span>
+              <span class="meta-chip">Local Save</span>
+              <span class="meta-chip">Batch Explore</span>
+              <span class="meta-chip">ChatGPT Image Flow</span>
+            </div>
+          </div>
+
+          <div class="topbar-actions">
+            <button id="load-template" class="ghost">载入推荐模板</button>
+            <label class="ghost import-button" for="import-workflow">导入表单</label>
+            <button id="run-workflow" class="primary">生成任务清单</button>
+            <button id="export-workflow" class="ghost">导出表单</button>
+            <button id="export-manifest" class="ghost">导出任务清单</button>
+            <button id="reset-workflow" class="ghost">恢复默认</button>
+          </div>
+          <input id="import-workflow" type="file" accept="application/json" hidden />
+        </header>
+
+        <div class="grid three intro-grid">
+          <section class="info-panel" data-tilt>
+            <div class="info-head"><span class="info-ico">01</span><strong>What It Solves</strong></div>
+            <div class="info-body">
+              <p>把散乱提示词压成固定输入结构，减少自由描述造成的误解、跑偏和重复沟通。</p>
+              <ul class="info-list">
+                <li>固定风格与版式规则</li>
+                <li>保留少数关键手动输入</li>
+                <li>适合封面、海报、活动主视觉</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="info-panel" data-tilt>
+            <div class="info-head"><span class="info-ico">02</span><strong>How Teams Use It</strong></div>
+            <div class="info-body">
+              <p>先填左侧表单，生成右侧任务清单，再把主推荐 Prompt 或批量探索任务发给 ChatGPT 出图。</p>
+              <ul class="info-list">
+                <li>先出主推荐方案</li>
+                <li>不满意再展开批量试图</li>
+                <li>完成后标记进度并保存方案</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="info-panel" data-tilt>
+            <div class="info-head"><span class="info-ico">03</span><strong>Why It Fits This Site</strong></div>
+            <div class="info-body">
+              <p>这页不是展示 ComfyUI 节点，而是把节点逻辑翻译成业务团队更容易执行的工业化表单系统。</p>
+              <ul class="info-list">
+                <li>纯静态页面，无后端依赖</li>
+                <li>本地保存方案，轻量可复用</li>
+                <li>适合 Cloudflare Pages 直接托管</li>
+              </ul>
+            </div>
+          </section>
+        </div>
+
+        <div class="strip-head"><span class="strip-ico">◎</span> Operator Guide</div>
+        <div class="guide-shell">
+          <section class="guide-panel">
+            <div class="guide-kicker">Recommended Flow</div>
+            <div class="guide-steps">
+              <div class="guide-step"><span>1</span><p>填写标题、用途、视觉方向与批量范围。</p></div>
+              <div class="guide-step"><span>2</span><p>先点“生成任务清单”，复制主推荐 Prompt 去 ChatGPT 出第一张。</p></div>
+              <div class="guide-step"><span>3</span><p>如果结果接近目标，就直接继续；如果不满意，再展开批量试图区试更多版本。</p></div>
+            </div>
+          </section>
+
+          <section class="guide-panel">
+            <div class="guide-kicker">Built For First-Time Use</div>
+            <div class="guide-tags">
+              <span>主方案优先</span>
+              <span>批量试图后置</span>
+              <span>保存方案复用</span>
+              <span>表单输入受控</span>
+            </div>
+            <p class="guide-copy">
+              这套结构的目标不是让使用者研究生图系统，而是让第一次上手的人也能靠界面本身快速理解操作逻辑。
+            </p>
+          </section>
+        </div>
+
+        <div class="strip-head"><span class="strip-ico">⌘</span> Prompt Operator Console</div>
+
+        <div class="app-layout">
+          <section class="form-shell">
+            <div id="form-panel" class="form-panel"></div>
+          </section>
+
+          <aside class="side-column">
+            <section class="panel summary-panel">
+              <div class="panel-head">
+                <h2>当前方案</h2>
+                <p>会根据你的表单自动汇总</p>
+              </div>
+              <div id="summary-panel" class="summary-body"></div>
+            </section>
+
+            <section class="panel results-panel">
+              <div class="panel-head">
+                <h2>生图工作台</h2>
+                <p id="results-caption">尚未生成任务</p>
+              </div>
+              <div id="results-panel" class="results-body empty">
+                先按步骤填写表单，再点“生成任务清单”。
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <footer class="page-footer">
+          <div class="footer-left">
+            <span class="footer-badge">MW</span>
+            <span>Prompt workflow page for controlled ChatGPT image production</span>
+          </div>
+          <div class="footer-right">Static HTML / CSS / JS · Local preset save</div>
+        </footer>
+      </div>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var frame = document.getElementById("frame");
+        var tiltEls = document.querySelectorAll("[data-tilt]");
+
+        window.addEventListener(
+          "pointermove",
+          function (event) {
+            root.style.setProperty("--mx", event.clientX + "px");
+            root.style.setProperty("--my", event.clientY + "px");
+
+            if (!frame || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+              return;
+            }
+
+            var dx = (event.clientX / window.innerWidth - 0.5) * 6;
+            var dy = (event.clientY / window.innerHeight - 0.5) * 4;
+            frame.style.transform = "translate3d(" + -dx + "px," + -dy + "px,0)";
+          },
+          { passive: true }
+        );
+
+        tiltEls.forEach(function (element) {
+          var raf = 0;
+          var tx = 0;
+          var ty = 0;
+          var cx = 50;
+          var cy = 50;
+
+          function update() {
+            element.style.transform =
+              "perspective(900px) rotateX(" + ty + "deg) rotateY(" + tx + "deg) translateZ(0)";
+            element.style.setProperty("--lx", cx + "%");
+            element.style.setProperty("--ly", cy + "%");
+            raf = 0;
+          }
+
+          element.addEventListener("pointermove", function (event) {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+              return;
+            }
+
+            var rect = element.getBoundingClientRect();
+            var px = (event.clientX - rect.left) / rect.width;
+            var py = (event.clientY - rect.top) / rect.height;
+            tx = (px - 0.5) * 9;
+            ty = (py - 0.5) * -7;
+            cx = px * 100;
+            cy = py * 100;
+
+            if (!raf) {
+              raf = requestAnimationFrame(update);
+            }
+          });
+
+          element.addEventListener("pointerleave", function () {
+            tx = 0;
+            ty = 0;
+
+            if (!raf) {
+              raf = requestAnimationFrame(update);
+            }
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

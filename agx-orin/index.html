@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGX Orin × 全天候 AI 服务器 — 落地方案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0c18;
+    --bg2:       #0f1220;
+    --card:      #f4efe6;
+    --card-dark: #141829;
+    --navy:      #1a3070;
+    --navy2:     #1e3a8a;
+    --blue:      #2563eb;
+    --cyan:      #60a5fa;
+    --cyan2:     #93c5fd;
+    --orange:    #e86020;
+    --amber:     #f59e0b;
+    --green:     #10b981;
+    --red:       #ef4444;
+    --text:      #1a1a2e;
+    --muted:     #64748b;
+    --mono:      'IBM Plex Mono', monospace;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--card);
+    font-family: var(--mono);
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* scanline */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);
+    pointer-events:none; z-index:9999;
+  }
+
+  /* ── BACK BUTTON ─────────────────────── */
+  .back-btn {
+    position: fixed; top: 16px; left: 16px; z-index: 1000;
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--cyan); padding: 6px 14px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px;
+    color: var(--cyan); text-decoration: none; text-transform: uppercase;
+    background: rgba(13,17,53,.85); backdrop-filter: blur(8px);
+    transition: background .2s, color .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .back-btn:hover { background: var(--cyan); color: #0a0c18; }
+  .back-btn::before { content: '◂'; font-size: 10px; }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    background: linear-gradient(135deg, #0d1535 0%, #1a2d5a 50%, #0f1f3d 100%);
+    border-bottom: 2px solid var(--cyan);
+    padding: 52px 24px 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content:'';
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse at 70% 40%, rgba(96,165,250,0.1) 0%, transparent 55%),
+      radial-gradient(ellipse at 20% 80%, rgba(232,96,32,0.06) 0%, transparent 40%),
+      repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,0.01) 60px,rgba(255,255,255,0.01) 61px);
+    pointer-events:none;
+  }
+  .hero-inner { position:relative; max-width:860px; margin:0 auto; }
+
+  .hero-chip {
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid var(--cyan); padding:4px 14px;
+    font-size:10px; letter-spacing:3px; color:var(--cyan);
+    text-transform:uppercase; margin-bottom:20px;
+    animation: fadeUp .6s ease both;
+  }
+  .hero-chip::before { content:'▸'; font-size:12px; }
+
+  .hero h1 {
+    font-size: clamp(22px,5vw,44px);
+    font-weight:700; line-height:1.1;
+    letter-spacing:-1px; color:#fff;
+    animation: fadeUp .6s .1s ease both;
+  }
+  .hero h1 em { color:var(--cyan); font-style:normal; }
+
+  .hero-sub {
+    margin-top:14px;
+    font-size: clamp(11px,2.5vw,13px);
+    color:rgba(255,255,255,.55);
+    line-height:1.7;
+    animation: fadeUp .6s .2s ease both;
+  }
+
+  .hero-tags {
+    margin-top:22px; display:flex; flex-wrap:wrap; gap:12px;
+    animation: fadeUp .6s .3s ease both;
+  }
+  .hero-tag {
+    font-size:10px; color:rgba(255,255,255,.4);
+    border-left:2px solid var(--cyan); padding-left:8px;
+    letter-spacing:.5px;
+  }
+
+  /* ── CONTAINER ─────────────────────────── */
+  .wrap { max-width:860px; margin:0 auto; padding:32px 16px 72px; }
+
+  /* ── TOC ──────────────────────────────── */
+  .toc {
+    background: var(--card-dark);
+    border:1px solid rgba(96,165,250,.18);
+    padding:18px 20px; margin-bottom:28px;
+    animation: fadeUp .5s ease both;
+  }
+  .toc-ttl { font-size:10px; letter-spacing:2px; color:var(--cyan); text-transform:uppercase; margin-bottom:12px; }
+  .toc-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; list-style:none; }
+  .toc-grid a {
+    color:rgba(255,255,255,.45); text-decoration:none; font-size:12px;
+    display:flex; align-items:center; gap:6px; padding:3px 0;
+    transition:color .2s;
+  }
+  .toc-grid a:hover, .toc-grid a:active { color:var(--cyan); }
+  .toc-grid a::before { content:'▸'; color:var(--cyan); font-size:9px; flex-shrink:0; }
+
+  /* ── SECTION ──────────────────────────── */
+  .sec { margin-bottom:24px; animation:fadeUp .5s ease both; }
+  .sec:nth-child(1){animation-delay:.05s}
+  .sec:nth-child(2){animation-delay:.1s}
+  .sec:nth-child(3){animation-delay:.15s}
+  .sec:nth-child(4){animation-delay:.2s}
+  .sec:nth-child(5){animation-delay:.25s}
+  .sec:nth-child(6){animation-delay:.3s}
+  .sec:nth-child(7){animation-delay:.35s}
+
+  .sec-hd {
+    background:var(--navy2); color:#fff;
+    padding:12px 16px;
+    display:flex; align-items:center; gap:10px;
+    font-size:clamp(11px,2.5vw,13px);
+    font-weight:600; letter-spacing:.5px; text-transform:uppercase;
+    border-bottom:2px solid var(--cyan);
+    cursor:pointer; user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .2s;
+  }
+  .sec-hd:hover { background:#1e40af; }
+  .sec-icon {
+    width:26px; height:26px; background:var(--cyan);
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; flex-shrink:0;
+  }
+  .sec-arrow { margin-left:auto; transition:transform .3s; flex-shrink:0; }
+  .sec-hd.closed .sec-arrow { transform:rotate(-90deg); }
+
+  .sec-bd {
+    background:var(--card); color:var(--text);
+    padding:20px 16px;
+    transition:max-height .4s ease, padding .3s;
+    overflow:hidden;
+  }
+  .sec-bd.closed { max-height:0!important; padding-top:0; padding-bottom:0; }
+
+  /* ── TYPOGRAPHY in cards ─────────────── */
+  .lbl {
+    display:block; font-size:10px; letter-spacing:1.5px;
+    text-transform:uppercase; color:var(--navy2); font-weight:700;
+    margin:18px 0 8px;
+  }
+  .lbl:first-child { margin-top:0; }
+  p { font-size:13px; line-height:1.75; color:var(--text); margin:8px 0; }
+
+  /* ── BOXES ───────────────────────────── */
+  .box-info {
+    border:1px solid var(--cyan); border-left:4px solid var(--cyan);
+    background:rgba(96,165,250,.06);
+    padding:14px 16px; margin:14px 0;
+    font-size:13px; line-height:1.7; color:var(--text);
+  }
+  .box-info strong { color:var(--navy2); }
+
+  .box-warn {
+    border:1px solid var(--amber); border-left:4px solid var(--amber);
+    background:rgba(245,158,11,.06);
+    padding:14px 16px; margin:14px 0;
+    font-size:13px; line-height:1.7; color:var(--text);
+  }
+  .box-warn strong { color:#92400e; }
+
+  .box-ok {
+    border:1px solid var(--green); border-left:4px solid var(--green);
+    background:rgba(16,185,129,.06);
+    padding:14px 16px; margin:14px 0;
+    font-size:13px; line-height:1.7; color:var(--text);
+  }
+  .box-ok strong { color:#065f46; }
+
+  /* ── TABLE ───────────────────────────── */
+  .tw { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:14px 0; }
+  table { width:100%; min-width:460px; border-collapse:collapse; font-size:12px; font-family:var(--mono); }
+  th {
+    background:var(--navy2); color:#fff;
+    padding:10px 12px; text-align:left;
+    font-size:10px; letter-spacing:1px; text-transform:uppercase; white-space:nowrap;
+  }
+  td { padding:9px 12px; border-bottom:1px solid rgba(0,0,0,.08); vertical-align:middle; }
+  tr:nth-child(even) td { background:rgba(0,0,0,.04); }
+  tr:hover td { background:rgba(30,58,138,.07); }
+
+  .badge {
+    display:inline-block; padding:2px 7px;
+    font-size:10px; font-weight:700; border-radius:2px; white-space:nowrap;
+  }
+  .b-green  { background:#d1fae5; color:#065f46; }
+  .b-blue   { background:#dbeafe; color:#1e40af; }
+  .b-yellow { background:#fef3c7; color:#92400e; }
+  .b-red    { background:#fee2e2; color:#991b1b; }
+  .b-gray   { background:#f1f5f9; color:#475569; }
+
+  /* ── BULLET LIST ──────────────────────── */
+  .blist { list-style:none; margin:10px 0; }
+  .blist li {
+    padding:8px 0 8px 22px; position:relative;
+    border-bottom:1px solid rgba(0,0,0,.06);
+    font-size:13px; line-height:1.65; color:var(--text);
+  }
+  .blist li:last-child { border-bottom:none; }
+  .blist li::before { content:'→'; position:absolute; left:0; color:var(--navy2); font-weight:700; }
+
+  /* ── CODE BLOCK ───────────────────────── */
+  .code {
+    background:#0d1117; border:1px solid #21262d;
+    border-left:3px solid var(--cyan);
+    padding:16px; margin:14px 0;
+    overflow-x:auto; -webkit-overflow-scrolling:touch;
+    font-family:var(--mono); font-size:12px;
+    line-height:1.85; color:#e6edf3; white-space:pre;
+  }
+  .cm { color:#8b949e; }
+  .ck { color:#79c0ff; }
+  .cs { color:#a8d5a2; }
+  .cc { color:var(--cyan); }
+
+  /* ── ARCH DIAGRAM ─────────────────────── */
+  .arch {
+    background:#0d1117; border:1px solid #21262d;
+    padding:18px 14px; margin:14px 0;
+    font-family:var(--mono); font-size:11px;
+    color:#e6edf3; line-height:2.1;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:pre;
+  }
+  .a-title { color:var(--cyan); font-weight:700; }
+  .a-node  { color:#a5d6ff; }
+  .a-arrow { color:#8b949e; }
+  .a-desc  { color:#8b949e; }
+  .a-ok    { color:var(--green); }
+
+  /* ── MEMORY BAR ───────────────────────── */
+  .mem-row {
+    display:flex; align-items:center; gap:8px; margin:8px 0; font-size:11px;
+  }
+  .mem-label { width:130px; flex-shrink:0; font-weight:600; color:var(--text); line-height:1.35; font-size:11px; }
+  .mem-bar-wrap {
+    flex:1; height:20px; background:rgba(0,0,0,.1);
+    border:1px solid rgba(0,0,0,.12); position:relative; overflow:hidden; min-width:60px;
+  }
+  .mem-bar {
+    height:100%; transition:width 1.2s cubic-bezier(.16,1,.3,1);
+    display:flex; align-items:center; padding-left:6px;
+    font-size:10px; color:rgba(255,255,255,.8); font-weight:600;
+  }
+  .m-llm   { background:#2563eb; }
+  .m-sd    { background:#10b981; }
+  .m-sys   { background:#6b7280; }
+  .m-free  { background:rgba(96,165,250,.25); border-left:2px dashed var(--cyan); }
+  .mem-val { width:60px; text-align:right; flex-shrink:0; font-weight:700; color:var(--text); font-size:12px; }
+
+  /* ── STEP CARD ───────────────────────── */
+  .step-num {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px; height:22px; background:var(--navy2); color:#fff;
+    font-size:11px; font-weight:700; flex-shrink:0; margin-right:8px;
+  }
+
+  /* ── PRODUCT CARD ─────────────────────── */
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin:14px 0; }
+  .pcard {
+    background:var(--card-dark); border:1px solid rgba(96,165,250,.15);
+    padding:16px; position:relative;
+  }
+  .pcard.rec { border-color:var(--cyan); }
+  .pcard.rec::before {
+    content:'推荐'; position:absolute; top:-1px; right:12px;
+    background:var(--cyan); color:#fff;
+    font-size:9px; font-weight:700; letter-spacing:1px; padding:2px 8px;
+  }
+  .pcard-name { font-size:13px; font-weight:700; color:var(--cyan); margin-bottom:10px; }
+  .pcard-spec { font-size:11px; color:rgba(255,255,255,.55); line-height:1.9; }
+  .pcard-spec span { color:rgba(255,255,255,.85); }
+  .pcard-price { margin-top:12px; font-size:14px; font-weight:700; color:#fff; }
+  .pcard-note { font-size:10px; color:rgba(255,255,255,.4); margin-top:4px; }
+
+  /* ── FOOTER ───────────────────────────── */
+  .footer {
+    background:var(--card-dark); border-top:1px solid rgba(96,165,250,.15);
+    padding:20px 16px; text-align:center;
+    font-size:10px; color:rgba(255,255,255,.25);
+    letter-spacing:2px; font-family:var(--mono);
+  }
+  .footer em { color:var(--cyan); font-style:normal; }
+
+  /* ── ANIMATIONS ─────────────────────── */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ── MOBILE ──────────────────────────── */
+  @media(max-width:520px){
+    .hero { padding:36px 16px 32px; }
+    .toc-grid { grid-template-columns:1fr; }
+    .wrap { padding:20px 12px 56px; }
+    .sec-bd { padding:16px 12px; }
+    .sec-hd { font-size:11px; padding:11px 12px; }
+    .code, .arch { font-size:11px; padding:12px; }
+    td, th { padding:8px 10px; }
+    .mem-label { width:100px; font-size:10px; }
+    .cards { grid-template-columns:1fr; }
+    p, .blist li { font-size:12px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="/" class="back-btn">Home</a>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-chip">Edge AI Server Setup Guide</div>
+    <h1>JETSON AGX ORIN<br><em>全天候 AI 服务器</em> 落地方案</h1>
+    <div class="hero-sub">
+      大模型推理 · Hermes Agent · ComfyUI / Stable Diffusion<br>
+      CUDA 原生 · 统一内存 · 低功耗 24h 常驻 · 自媒体创作工作流
+    </div>
+    <div class="hero-tags">
+      <div class="hero-tag">CUDA Native · Full ComfyUI</div>
+      <div class="hero-tag">64GB Unified Memory</div>
+      <div class="hero-tag">15~60W Always-On</div>
+      <div class="hero-tag">Updated May 2026</div>
+      <div class="hero-tag">@Miyazawa</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="wrap">
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-ttl">// 目录导航</div>
+    <ul class="toc-grid">
+      <li><a href="#why">为什么不选 32GB</a></li>
+      <li><a href="#lineup">产品线完整对比</a></li>
+      <li><a href="#value">Jetson 的独特价值</a></li>
+      <li><a href="#memory">内存分配方案</a></li>
+      <li><a href="#install">软件安装步骤</a></li>
+      <li><a href="#workflow">Claude Code 工作流</a></li>
+      <li><a href="#arch-sec">完整架构图</a></li>
+      <li><a href="#rec">最终建议</a></li>
+    </ul>
+  </div>
+
+  <!-- ── 1: WHY NOT 32GB ── -->
+  <div class="sec" id="why">
+    <div class="sec-hd" onclick="tog(this)">
+      <div class="sec-icon">⚠</div>
+      为什么 AGX Orin 32GB 不够用？
+      <span class="sec-arrow">▾</span>
+    </div>
+    <div class="sec-bd">
+      <div class="box-warn">
+        <strong>核心问题：</strong>32GB 统一内存在同时运行大模型 + ComfyUI 时会直接溢出。Jetson 的 CPU 与 GPU 共享同一块内存池，两个任务的内存需求相加后超出上限，系统会开始频繁 swap，性能断崖式下跌。
+      </div>
+
+      <span class="lbl">// 32GB 内存实际分配压力</span>
+      <div class="mem-row">
+        <div class="mem-label">Gemma 4 26B MoE<br><small style="color:#888;font-size:9px">主力 LLM</small></div>
+        <div class="mem-bar-wrap"><div class="mem-bar m-llm" data-w="62%" style="width:0%">~20GB</div></div>
+        <div class="mem-val">20 GB</div>
+      </div>
+      <div class="mem-row">
+        <div class="mem-label">SDXL（ComfyUI）<br><small style="color:#888;font-size:9px">图像生成</small></div>
+        <div class="mem-bar-wrap"><div class="mem-bar m-sd" data-w="28%" style="width:0%">~9GB</div></div>
+        <div class="mem-val">9 GB</div>
+      </div>
+      <div class="mem-row">
+        <div class="mem-label">系统 + Hermes<br><small style="color:#888;font-size:9px">OS 开销</small></div>
+        <div class="mem-bar-wrap"><div class="mem-bar m-sys" data-w="12%" style="width:0%">~4GB</div></div>
+        <div class="mem-val">4 GB</div>
+      </div>
+      <div class="mem-row">
+        <div class="mem-label">合计需求</div>
+        <div class="mem-bar-wrap"><div class="mem-bar" style="width:100%;background:#ef4444;">⚠ 超出 32GB 上限</div></div>
+        <div class="mem-val" style="color:#ef4444;font-weight:700;">33 GB</div>
+      </div>
+
+      <div class="box-warn" style="margin-top:16px">
+        <strong>直接结论：</strong>AGX Orin 32GB 只适合单模型场景——要么跑 LLM，要么跑 ComfyUI，无法稳定同时运行。作为全天候 AI 服务器主力机，32GB 是错误的选择。
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2: PRODUCT LINEUP ── -->
+  <div class="sec" id="lineup">
+    <div class="sec-hd" onclick="tog(this)">
+      <div class="sec-icon">◈</div>
+      Jetson 产品线完整对比
+      <span class="sec-arrow">▾</span>
+    </div>
+    <div class="sec-bd">
+
+      <div class="cards">
+        <div class="pcard">
+          <div class="pcard-name">AGX Orin 32GB</div>
+          <div class="pcard-spec">
+            内存 <span>32GB</span><br>
+            算力 <span>200 TOPS</span><br>
+            功耗 <span>15~40W</span><br>
+            存储 <span>32GB eMMC</span>
+          </div>
+          <div class="pcard-price">~$999</div>
+          <div class="pcard-note">❌ 多任务内存不足</div>
+        </div>
+        <div class="pcard rec">
+          <div class="pcard-name">AGX Orin 64GB</div>
+          <div class="pcard-spec">
+            内存 <span>64GB 256-bit</span><br>
+            带宽 <span>204.8 GB/s</span><br>
+            算力 <span>275 TOPS</span><br>
+            功耗 <span>15~60W</span>
+          </div>
+          <div class="pcard-price">$1,999</div>
+          <div class="pcard-note">✅ LLM + ComfyUI 同时运行</div>
+        </div>
+        <div class="pcard">
+          <div class="pcard-name">AGX Thor T4000</div>
+          <div class="pcard-spec">
+            内存 <span>64GB LPDDR5X</span><br>
+            带宽 <span>273 GB/s</span><br>
+            算力 <span>1200 FP4 TFLOPS</span><br>
+            功耗 <span>40~70W</span>
+          </div>
+          <div class="pcard-price">~$3,500</div>
+          <div class="pcard-note">⚠ 对创作场景性价比极差</div>
+        </div>
+        <div class="pcard">
+          <div class="pcard-name">AGX Thor T5000</div>
+          <div class="pcard-spec">
+            内存 <span>128GB LPDDR5X</span><br>
+            带宽 <span>高</span><br>
+            算力 <span>2070 FP4 TFLOPS</span><br>
+            功耗 <span>60~130W</span>
+          </div>
+          <div class="pcard-price">更高</div>
+          <div class="pcard-note">机器人 / 物理 AI 专用</div>
+        </div>
+      </div>
+
+      <span class="lbl">// 性能参数横向比较</span>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>设备</th><th>内存</th><th>LLM 推理速度</th><th>ComfyUI 支持</th><th>功耗</th><th>定位</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>AGX Orin 32GB</td><td>32GB</td><td>~25 t/s（13B）</td><td><span class="badge b-yellow">单独运行</span></td><td>15~40W</td><td>单模型</td></tr>
+            <tr><td><strong>AGX Orin 64GB</strong></td><td><strong>64GB</strong></td><td><strong>~40 t/s（20B）</strong></td><td><span class="badge b-green">LLM 同时运行 ✓</span></td><td><strong>15~60W</strong></td><td><strong>推荐</strong></td></tr>
+            <tr><td>AGX Thor T4000</td><td>64GB</td><td>~57 t/s（+42%）</td><td><span class="badge b-green">✓</span></td><td>40~70W</td><td>机器人 AI</td></tr>
+            <tr><td>AGX Thor T5000</td><td>128GB</td><td>极快</td><td><span class="badge b-green">✓</span></td><td>60~130W</td><td>100B+ 模型</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box-warn">
+        <strong>⚠ 关于 AGX Thor 的真实情况：</strong>Thor 比 Orin 64GB 在 LLM 推理上快约 42%，主要来自内存带宽提升（273 vs 204.8 GB/s），而非 FP4 算力优势——因为当前 Ollama/llama.cpp 走 CUDA/cuBLAS 路径，Thor 的 Transformer Engine 并不完全激活。花 $1,500 多换来 42% 速度提升，对创作型工作流性价比极差。
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3: UNIQUE VALUE ── -->
+  <div class="sec" id="value">
+    <div class="sec-hd" onclick="tog(this)">
+      <div class="sec-icon">★</div>
+      Jetson AGX 的不可替代优势
+      <span class="sec-arrow">▾</span>
+    </div>
+    <div class="sec-bd">
+      <p>Jetson AGX Orin 64GB 是目前市场上唯一同时满足以下三点的设备：</p>
+
+      <span class="lbl">// 三重优势叠加</span>
+      <ul class="blist">
+        <li><strong>CUDA 原生 + ComfyUI 全节点</strong>：不像 Mac 只能走 MPS 残缺版，AGX Orin 有完整 CUDA 支持，ComfyUI 所有 Custom Nodes（ControlNet、AnimateDiff、IPAdapter 等）全部可用，是真正的 ComfyUI 主力机</li>
+        <li><strong>统一内存无 VRAM 瓶颈</strong>：不像 RTX 4090 受限于 24GB 独立显存，64GB 统一内存可让 LLM + ComfyUI 真正同时运行，不需要频繁卸载模型</li>
+        <li><strong>低功耗全天候常驻</strong>：15~60W 功耗，24 小时开机年电费约 ¥3,000~¥8,000（vs RTX 4090 整机约 ¥50,000+），适合作为永远在线的私有 AI 服务器</li>
+      </ul>
+
+      <span class="lbl">// 与其他方案对比</span>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>方案</th><th>CUDA ComfyUI</th><th>LLM 同时跑</th><th>功耗</th><th>价格</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>RTX 4090 PC</td><td><span class="badge b-green">✓ 最快</span></td><td><span class="badge b-red">❌ VRAM 24GB 瓶颈</span></td><td>~500W</td><td>~¥500,000</td></tr>
+            <tr><td>Mac Studio M4 Max 64GB</td><td><span class="badge b-yellow">△ MPS 残缺</span></td><td><span class="badge b-green">✓ 统一内存</span></td><td>~60W</td><td>~¥350,000</td></tr>
+            <tr><td><strong>AGX Orin 64GB</strong></td><td><span class="badge b-green">✓ CUDA 全节点</span></td><td><span class="badge b-green">✓ 64GB 统一内存</span></td><td><strong>~60W</strong></td><td><strong>~¥290,000</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box-ok">
+        <strong>结论：</strong>AGX Orin 64GB 是三个方案里唯一同时具备 CUDA 全节点 ComfyUI 和统一内存 LLM 推理的选择，而且价格最低、功耗最小。这是它作为全天候 AI 服务器的核心理由。
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 4: MEMORY ALLOCATION ── -->
+  <div class="sec" id="memory">
+    <div class="sec-hd" onclick="tog(this)">
+      <div class="sec-icon">▦</div>
+      64GB 内存分配方案
+      <span class="sec-arrow">▾</span>
+    </div>
+    <div class="sec-bd">
+      <div class="box-info">
+        <strong>策略：</strong>LLM 推理（Ollama）与 ComfyUI 共享 64GB 统一内存池。通过分层模型策略，常驻小模型处理实时任务，大模型按需加载，预留充足 buffer 给 ComfyUI 图像生成。
+      </div>
+
+      <span class="lbl">// 内存分配可视化</span>
+
+      <div class="mem-row">
+        <div class="mem-label">Gemma 4 26B MoE<br><small style="color:#888;font-size:9px">主力 LLM</small></div>
+        <div class="mem-bar-wrap"><div class="mem-bar m-llm" data-w="31%" style="width:0%">20GB</div></div>
+        <div class="mem-val">20 GB</div>
+      </div>
+      <div class="mem-row">
+        <div class="mem-label">Gemma 4 E2B<br><small style="color:#888;font-size:9px">快速分类</small></div>
+        <div class="mem-bar-wrap"><div class="mem-bar m-llm" data-w="6%" style="width:0%;opacity:.7">4G</div></div>
+        <div class="mem-val">4 GB</div>
+      </div>
+      <div class="mem-row">
+        <div class="mem-label">SDXL（ComfyUI）<br><small style="color:#888;font-size:9px">高质量出图</small></div>
+        <div class="mem-bar-wrap"><div class="mem-bar m-sd" data-w="14%" style="width:0%">9GB</div></div>
+        <div class="mem-val">9 GB</div>
+      </div>
+      <div class="mem-row">
+        <div class="mem-label">SD 1.5（ComfyUI）<br><small style="color:#888;font-size:9px">批量快速</small></div>
+        <div class="mem-bar-wrap"><div class="mem-bar m-sd" data-w="6%" style="width:0%;opacity:.7">4G</div></div>
+        <div class="mem-val">4 GB</div>
+      </div>
+      <div class="mem-row">
+        <div class="mem-label">Hermes + 系统<br><small style="color:#888;font-size:9px">OS 开销</small></div>
+        <div class="mem-bar-wrap"><div class="mem-bar m-sys" data-w="6%" style="width:0%">4G</div></div>
+        <div class="mem-val">4 GB</div>
+      </div>
+      <div class="mem-row">
+        <div class="mem-label">剩余可用<br><small style="color:#888;font-size:9px">Buffer</small></div>
+        <div class="mem-bar-wrap"><div class="mem-bar m-free" data-w="36%" style="width:0%">充裕</div></div>
+        <div class="mem-val" style="color:var(--navy2);">23 GB</div>
+      </div>
+
+      <p style="font-size:11px;color:var(--muted);margin-top:12px">注：SDXL 和 SD 1.5 不同时加载，按任务切换；大模型（26B）在图像生成密集期可卸载，E2B 常驻负责实时任务。</p>
+
+      <span class="lbl">// 推荐模型组合</span>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>模型</th><th>参数量</th><th>内存</th><th>推理速度</th><th>用途</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Gemma 4 26B MoE</strong></td><td>激活 3.8B</td><td>~20GB</td><td>~40 t/s</td><td>脚本创作、内容生成 ⭐</td></tr>
+            <tr><td>Gemma 4 E2B</td><td>2.3B</td><td>~4GB</td><td>~95 t/s</td><td>实时字幕、消息分类</td></tr>
+            <tr><td>DeepSeek R1 8B（备选）</td><td>8B</td><td>~5GB</td><td>~50 t/s</td><td>强推理任务</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 5: INSTALL ── -->
+  <div class="sec" id="install">
+    <div class="sec-hd" onclick="tog(this)">
+      <div class="sec-icon">⚙</div>
+      软件安装步骤（JetPack 6.x）
+      <span class="sec-arrow">▾</span>
+    </div>
+    <div class="sec-bd">
+
+      <div class="box-warn">
+        <strong>⚠ 前提：</strong>确认系统为 JetPack 6.x（基于 Ubuntu 22.04），内核 5.15，预装 CUDA 12.x。运行 <code style="background:rgba(0,0,0,.1);padding:1px 5px;">jetson_release</code> 确认版本后再继续。
+      </div>
+
+      <span class="lbl">// Step 1 — 确认环境</span>
+      <div class="code"><span class="cm"># 查看 JetPack 版本</span>
+<span class="cc">jetson_release</span>
+
+<span class="cm"># 确认 CUDA 可用</span>
+<span class="cc">nvcc --version</span>
+<span class="cc">nvidia-smi</span>
+
+<span class="cm"># 确认内存（应显示约 64GB）</span>
+<span class="cc">free -h</span></div>
+
+      <span class="lbl">// Step 2 — 安装 Ollama（ARM64 + CUDA 自动识别）</span>
+      <div class="code"><span class="cm"># 一键安装，自动识别 Jetson CUDA 环境</span>
+<span class="cc">curl -fsSL https://ollama.com/install.sh | sh</span>
+
+<span class="cm"># 下载模型</span>
+<span class="cc">ollama pull gemma4:e2b</span>        <span class="cm"># 4GB 常驻快速层</span>
+<span class="cc">ollama pull gemma4:26b-a4b</span>    <span class="cm"># 20GB 主力生成层 ⭐</span>
+
+<span class="cm"># 测试推理</span>
+<span class="cc">ollama run gemma4:26b-a4b "你好，测试一下推理速度"</span></div>
+
+      <span class="lbl">// Step 3 — ComfyUI（官方 Jetson Docker 镜像）</span>
+      <div class="code"><span class="cm"># 使用 dustynv 官方镜像，最省事，CUDA 全支持</span>
+<span class="cc">sudo docker run --runtime nvidia \
+  --name comfyui \
+  -p 8188:8188 \
+  -v ~/comfyui-data:/data \
+  --restart unless-stopped \
+  dustynv/comfyui:r36.4.0</span>
+
+<span class="cm"># 浏览器访问</span>
+<span class="cm"># http://jetson-ip:8188</span>
+
+<span class="cm"># 模型放置路径</span>
+<span class="cm"># ~/comfyui-data/models/checkpoints/  ← checkpoint</span>
+<span class="cm"># ~/comfyui-data/models/loras/        ← LoRA</span></div>
+
+      <span class="lbl">// Step 4 — Hermes Agent</span>
+      <div class="code"><span class="cm"># 安装依赖</span>
+<span class="cc">pip3 install hermes-agent --break-system-packages</span>
+
+<span class="cm"># 配置连接本地 Ollama</span>
+<span class="cc">cat > ~/.hermes/config.yaml << 'EOF'</span>
+<span class="ck">llm:</span>
+  <span class="ck">provider:</span> <span class="cs">"ollama"</span>
+  <span class="ck">endpoint:</span> <span class="cs">"http://localhost:11434"</span>
+  <span class="ck">model:</span> <span class="cs">"gemma4:26b-a4b"</span>
+<span class="ck">routing:</span>
+  <span class="ck">fast:</span>    <span class="cs">"gemma4:e2b"</span>
+  <span class="ck">primary:</span> <span class="cs">"gemma4:26b-a4b"</span>
+<span class="cc">EOF</span>
+
+<span class="cm"># 后台常驻启动</span>
+<span class="cc">hermes gateway start --daemon</span></div>
+
+      <span class="lbl">// Step 5 — 开机自启（systemd）</span>
+      <div class="code"><span class="cm"># Ollama 已自动注册为 systemd 服务</span>
+<span class="cc">sudo systemctl enable ollama</span>
+<span class="cc">sudo systemctl start ollama</span>
+
+<span class="cm"># ComfyUI Docker 设置为开机自启</span>
+<span class="cc">sudo docker update --restart unless-stopped comfyui</span>
+
+<span class="cm"># Hermes 注册为服务（可选）</span>
+<span class="cc">sudo systemctl enable hermes</span></div>
+
+    </div>
+  </div>
+
+  <!-- ── 6: CLAUDE CODE WORKFLOW ── -->
+  <div class="sec" id="workflow">
+    <div class="sec-hd" onclick="tog(this)">
+      <div class="sec-icon">✦</div>
+      Claude Code + 本地模型工作流整合
+      <span class="sec-arrow">▾</span>
+    </div>
+    <div class="sec-bd">
+      <p>Claude Code 通过 SSH 从 Mac 远程连接 Jetson，在 Jetson 本地执行任务。本地模型（Ollama）和 ComfyUI 作为 API 端点，被 Claude Code 编写的自动化脚本调用。</p>
+
+      <span class="lbl">// 远程连接方式</span>
+      <div class="code"><span class="cm"># Mac 端：SSH 连接 Jetson</span>
+<span class="cc">ssh miyazawa@192.168.x.x</span>
+
+<span class="cm"># 或使用 VS Code Remote SSH 插件</span>
+<span class="cm"># 连接后在 Jetson 上启动 Claude Code</span>
+<span class="cc">claude</span></div>
+
+      <span class="lbl">// Hermes → Ollama → ComfyUI 联动示例</span>
+      <div class="code"><span class="cm">#!/usr/bin/env python3</span>
+<span class="cm"># 自媒体内容自动化：脚本生成 → 配图生成</span>
+
+<span class="cc">import requests, json</span>
+
+<span class="cm"># Step 1: 调用本地 Ollama 生成视频脚本关键画面描述</span>
+<span class="cc">resp = requests.post("http://localhost:11434/api/generate",
+    json={
+        "model": "gemma4:26b-a4b",
+        "prompt": "为以下主题生成3个关键画面的英文描述: AI边缘计算",
+        "stream": False
+    })</span>
+<span class="cc">descriptions = resp.json()["response"]</span>
+
+<span class="cm"># Step 2: 将描述传入 ComfyUI 触发图像生成</span>
+<span class="cc">workflow = load_workflow("sdxl_base.json")
+workflow["prompt_node"]["inputs"]["text"] = descriptions
+
+comfy_resp = requests.post("http://localhost:8188/prompt",
+    json={"prompt": workflow})</span>
+
+<span class="cm"># Step 3: 等待生成完成，下载图片</span>
+<span class="cc">job_id = comfy_resp.json()["prompt_id"]
+print(f"生成任务已提交: {job_id}")</span></div>
+
+      <span class="lbl">// 典型自动化场景</span>
+      <ul class="blist">
+        <li><strong>封面图批量生产</strong>：Hermes 接收标题列表 → Ollama 生成画面描述 → ComfyUI 批量出图 → 自动整理到素材库</li>
+        <li><strong>视频脚本 + 分镜图</strong>：Claude Code 调用 26B 模型生成完整脚本，同时触发 ComfyUI 为每个关键帧生成配图</li>
+        <li><strong>内容日历自动化</strong>：每天定时运行，拉取热点 → 生成 7 天发布计划 → 配套图片全部生成完毕</li>
+        <li><strong>直播素材准备</strong>：开播前 30 分钟，Hermes 自动生成当天话题卡片图、背景图各 5 套备用</li>
+        <li><strong>LoRA 风格一键应用</strong>：自定义 LoRA 品牌风格已训练完毕，Claude Code 脚本一键调用生成统一视觉风格的系列图</li>
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- ── 7: ARCH DIAGRAM ── -->
+  <div class="sec" id="arch-sec">
+    <div class="sec-hd" onclick="tog(this)">
+      <div class="sec-icon">◉</div>
+      完整系统架构图
+      <span class="sec-arrow">▾</span>
+    </div>
+    <div class="sec-bd">
+
+      <div class="arch"><span class="a-title">AGX Orin 64GB（24小时常驻，~60W）</span>
+<span class="a-arrow">│</span>
+<span class="a-arrow">├──</span> <span class="a-node">Ollama 服务</span>        <span class="a-desc">localhost:11434</span>
+<span class="a-arrow">│   ├──</span> <span class="a-node">gemma4:e2b</span>        <span class="a-ok">● 常驻</span>  <span class="a-desc">~4GB · 实时字幕/分类</span>
+<span class="a-arrow">│   └──</span> <span class="a-node">gemma4:26b-a4b</span>    <span class="a-ok">● 按需</span>  <span class="a-desc">~20GB · 脚本/内容生成</span>
+<span class="a-arrow">│</span>
+<span class="a-arrow">├──</span> <span class="a-node">ComfyUI</span>             <span class="a-desc">localhost:8188（Docker·CUDA全节点）</span>
+<span class="a-arrow">│   ├──</span> <span class="a-desc">SDXL checkpoint    → 高质量封面图/宣传图</span>
+<span class="a-arrow">│   ├──</span> <span class="a-desc">SD 1.5             → 批量快速出图</span>
+<span class="a-arrow">│   ├──</span> <span class="a-desc">ControlNet         → 构图精确控制</span>
+<span class="a-arrow">│   └──</span> <span class="a-desc">LoRA 品牌风格      → 统一视觉输出</span>
+<span class="a-arrow">│</span>
+<span class="a-arrow">├──</span> <span class="a-node">Hermes Agent</span>        <span class="a-ok">● 常驻守护进程</span>
+<span class="a-arrow">│   ├──</span> <span class="a-desc">内容日历自动化（30天排期）</span>
+<span class="a-arrow">│   ├──</span> <span class="a-desc">多平台标题/hashtag 批量生成</span>
+<span class="a-arrow">│   └──</span> <span class="a-desc">ComfyUI API 联动触发出图</span>
+<span class="a-arrow">│</span>
+<span class="a-arrow">└──</span> <span class="a-node">SSH 入口</span>            <span class="a-desc">Port 22</span>
+    <span class="a-arrow">└──</span> <span class="a-desc">Mac 端 Claude Code 远程连接操作</span>
+
+<span class="a-title">Mac（创作主机）</span>
+<span class="a-arrow">│</span>
+<span class="a-arrow">├──</span> <span class="a-node">Claude Code</span>         <span class="a-desc">SSH → Jetson 远程执行</span>
+<span class="a-arrow">├──</span> <span class="a-node">Final Cut Pro</span>       <span class="a-desc">视频剪辑（Metal 加速）</span>
+<span class="a-arrow">├──</span> <span class="a-node">Draw Things</span>         <span class="a-desc">快速本地出图（Metal 原生）</span>
+<span class="a-arrow">└──</span> <span class="a-node">Claude API（云端）</span>   <span class="a-desc">高质量长文/品牌策划</span></div>
+
+      <div class="box-ok">
+        <strong>双机协作：</strong>Jetson 作为 24h AI 后台服务器（LLM + ComfyUI + Hermes），Mac 作为创作前台（视频剪辑 + 远程 Claude Code 操控 Jetson）。两者通过 SSH 和 API 协作，各司其职，覆盖完整的自媒体创作工作流。
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 8: RECOMMENDATION ── -->
+  <div class="sec" id="rec">
+    <div class="sec-hd" onclick="tog(this)">
+      <div class="sec-icon">✓</div>
+      最终建议与购买决策
+      <span class="sec-arrow">▾</span>
+    </div>
+    <div class="sec-bd">
+
+      <span class="lbl">// 选购路线对比</span>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>如果你的预算是…</th><th>推荐方案</th><th>核心理由</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>約 ¥290,000</td><td><strong>AGX Orin 64GB 单机</strong></td><td>LLM + ComfyUI 同时运行，CUDA 全节点，24h 低功耗</td></tr>
+            <tr><td>約 ¥600,000</td><td><strong>AGX Orin 64GB + Mac Studio M4 Max</strong></td><td>Jetson 做 AI 后台，Mac 做视频剪辑前台，覆盖最完整</td></tr>
+            <tr><td>約 ¥500,000</td><td>RTX 4090 PC</td><td>ComfyUI 出图最快，但 LLM 受 VRAM 限制，功耗高</td></tr>
+            <tr><td>約 ¥500,000</td><td><span class="badge b-red">❌ AGX Thor T4000</span></td><td>对创作工作流性价比极差，仅适合机器人研发</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <span class="lbl">// 各场景能力对比</span>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>能力</th><th>AGX Orin 64GB</th><th>RTX 4090 PC</th><th>Mac Studio M4 Max</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ComfyUI 全节点</td><td><span class="badge b-green">✓ CUDA</span></td><td><span class="badge b-green">✓ 最快</span></td><td><span class="badge b-yellow">△ 节点残缺</span></td></tr>
+            <tr><td>LLM + SD 同时运行</td><td><span class="badge b-green">✓ 64GB 统一</span></td><td><span class="badge b-red">❌ 24GB 瓶颈</span></td><td><span class="badge b-green">✓ 统一内存</span></td></tr>
+            <tr><td>24h 低功耗常驻</td><td><span class="badge b-green">✓ ~60W</span></td><td><span class="badge b-red">❌ ~500W</span></td><td><span class="badge b-green">✓ ~60W</span></td></tr>
+            <tr><td>视频剪辑（FCP）</td><td><span class="badge b-red">❌ 无</span></td><td><span class="badge b-yellow">△ Windows</span></td><td><span class="badge b-green">✓ 原生最优</span></td></tr>
+            <tr><td>出图速度（SDXL）</td><td>~15 秒</td><td><strong>~5~8 秒</strong></td><td>~16 秒（Draw Things）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box-ok">
+        <strong>最终推荐：AGX Orin 64GB（$1,999）</strong><br><br>
+        这是目前唯一在同等价位内同时拥有 CUDA 全节点 ComfyUI 和 64GB 统一内存 LLM 推理的选择。作为自媒体创作的全天候 AI 后台服务器，它能稳定运行大模型 + Hermes + ComfyUI 三套系统，年电费仅约 ¥3,000~¥8,000，是性价比和能力覆盖最均衡的方案。
+        <br><br>
+        如果后续想进一步提升，最优升级路径是增加 <strong>Mac Studio 作为创作前台</strong>，而不是升级到 AGX Thor——两机协作比单台 Thor 更实用，总成本相当，但覆盖视频剪辑、Draw Things 等 Mac 专属生态。
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<div class="footer">
+  <div>// JETSON AGX ORIN 64GB · FULL-TIME AI SERVER SETUP GUIDE //</div>
+  <div style="margin-top:8px"><em>miyazawa-workspace.com</em> · 2026</div>
+</div>
+
+<script>
+  // Toggle sections
+  function tog(hd) {
+    const bd = hd.nextElementSibling;
+    const isOpen = !bd.classList.contains('closed');
+    if (isOpen) {
+      bd.style.maxHeight = bd.scrollHeight + 'px';
+      requestAnimationFrame(() => {
+        bd.style.maxHeight = '0';
+        bd.classList.add('closed');
+        hd.classList.add('closed');
+      });
+    } else {
+      bd.classList.remove('closed');
+      hd.classList.remove('closed');
+      bd.style.maxHeight = bd.scrollHeight + 'px';
+      setTimeout(() => { bd.style.maxHeight = 'none'; }, 420);
+    }
+  }
+
+  // Init all open
+  document.querySelectorAll('.sec-bd').forEach(bd => {
+    bd.style.maxHeight = bd.scrollHeight + 'px';
+    setTimeout(() => { bd.style.maxHeight = 'none'; }, 600);
+  });
+
+  // Animate memory bars on scroll
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.mem-bar[data-w]').forEach(bar => {
+          setTimeout(() => { bar.style.width = bar.dataset.w; }, 200);
+        });
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.sec').forEach(s => io.observe(s));
+</script>
+</body>
+</html>

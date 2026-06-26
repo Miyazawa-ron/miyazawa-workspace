@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIPPT 核心提效工作流实操</title>
+  <meta name="description" content="手把手教你如何用AI进行10分钟极速出PPT、风格复刻、动态微特效背景生成等核心提效工作流。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo" id="logo-nav">AIPPT <span>评估分析大盘</span></a>
+      <nav>
+        <ul>
+          <li><a href="index.html" id="nav-home">总览大盘</a></li>
+          <li><a href="tools.html" id="nav-tools">工具深度评估</a></li>
+          <li class="active"><a href="workflows.html" id="nav-workflows">核心极速流程</a></li>
+          <li><a href="scenarios.html" id="nav-scenarios">场景化实战策略</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>AI 制作 PPT <span>核心极速提效工作流</span></h1>
+      <p>本页收录了课程中最具实操价值的“降维打击”式工作流，配套现成的 Prompt 模板，拿来即用。</p>
+    </section>
+
+    <section style="margin-bottom: 4rem;">
+      <h2>一、10分钟极速建片工作流（无痛冷启动）</h2>
+      <p>当老板扔给你一份几页纸的长篇演讲稿，要求你 10 分钟后汇报，你可以直接运行这套工作流：</p>
+      
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title"><span class="number">1</span> 结构提炼</div>
+          <p class="card-desc">将整篇文字复制给 ChatGPT，让其整理成标准的 1-2 级标题目录结构大纲。</p>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="number">2</span> Markdown 转化</div>
+          <p class="card-desc">使用特定 Prompt 指令，命令 ChatGPT 将大纲重新排版为纯 Markdown 语法的代码块输出。</p>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="number">3</span> 导入 MindShow</div>
+          <p class="card-desc">复制 Markdown 代码块，粘贴进 MindShow 网站的导入框中，一键预览并导出为 PPT 格式。</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">📋 关键步骤一：Markdown 转换 Prompt 指令卡</div>
+        <p>在 ChatGPT 中大纲梳理好后，输入以下指令：</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span>ChatGPT Prompt</span>
+            <button class="btn-copy" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText); alert('已复制到剪贴板！');">复制</button>
+          </div>
+          <code>请根据刚刚确定的 PPT 大纲内容，使用 Markdown 语言编写成代码块（Code Block）输出。每一页的 PPT 标题请用 # 表示，二级标题或要点请用 ## 或无序列表 - 表示。不要有任何多余的解释，直接输出代码块。</code>
+        </div>
+      </div>
+      
+      <div class="callout">
+        <div class="callout-title">🎨 关键步骤二：AI 辅助配图占位符 Prompt 指令卡</div>
+        <p>如果你希望在极速大纲生成时直接带上精准的图片，可以输入这串特殊的 Markdown 图片占位符提示词：</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span>ChatGPT Prompt (Unsplash API 桥接)</span>
+            <button class="btn-copy" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText); alert('已复制到剪贴板！');">复制</button>
+          </div>
+          <code>接下来发照片时，请使用 Markdown 语言格式，不要包含斜线，不要使用任何代码块包裹，统一使用 unsplash API 格式：https://source.unsplash.com/1080x720/?&lt;英文关键词&gt;。每一页大纲请提取一个与之最贴切的英文关键词替换，如果理解了，请直接回复 OK。</code>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 4rem;">
+      <h2>二、高定风格复刻与 AI 底图生成流</h2>
+      <p>如果客户发给你一张很有设计感的 PPT 图片，要求发布会也做这个风格，但里面的元素和文字需要完全更换，可采用此流：</p>
+      
+      <div class="callout">
+        <div class="callout-title">🖼️ Midjourney 双向复刻与生成步骤</div>
+        <ol>
+          <li><strong>分析与拆解风格：</strong>打开 Midjourney 的对话框，输入 <code>/describe</code> 指令，上传客户的参考图片。</li>
+          <li><strong>提取关键词：</strong>Midjourney 会自动返还 4 组对该图色彩、构图、风格（如“蒸汽波风格”、“极简主义”、“磨砂玻璃效果”）的英文描述关键词。</li>
+          <li><strong>图像复刻与定制：</strong>使用 <code>/imagine</code> 指令。先将<strong>客户原图拖入对话框（作为参考图链接）</strong>，然后复制刚才最贴切的关键词，并在其后加上关键的控制参数：
+            <div class="code-block" style="margin-top: 0.5rem; background-color: rgba(255, 255, 255, 0.02);">
+              <code>&lt;参考图 URL&gt; a sleek vector design, a futuristic office environment, tech purple and orange colors --chaos 1 --iw 2 --ar 16:9</code>
+            </div>
+            <ul>
+              <li><code>--chaos 1</code>：控制图片的随机性（0-100），数字越小，随机度越低，生成的一组图风格越统一。</li>
+              <li><code>--iw 2</code>：控制参考图权重（0-5），数值越大，生成的图片和客户原图越像（默认为 0.25）。</li>
+              <li><code>--ar 16:9</code>：指定宽屏屏幕比例，做 PPT 必带此参数。</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 4rem;">
+      <h2>三、动态微特效背景生成流</h2>
+      <p>想要让你的 PPT 从普通工业品一跃成为高逼格科技现场，可以尝试生成动态背景：</p>
+      <ol>
+        <li>在 <strong>Midjourney</strong> 里生成好你满意的 16:9 精美底图。</li>
+        <li>打开 <strong>Kaiber.ai</strong> 网站。上传该底图。</li>
+        <li>在动效 Prompt 文本框中输入你希望产生的微动效描述（例如：星星微闪、光影浮动、背景粒子缓缓升起，天空由黄变蓝）。</li>
+        <li>风格选择“Cinema”（电影画质），运动时间设置为 4 秒，导出 MP4 视频。</li>
+        <li><strong>PPT 内嵌入：</strong>打开 PowerPoint，将导出的 4 秒 MP4 拖拽进幻灯片底层，在“视频-播放”选项卡中，将开始方式设为“自动”，并勾选<strong>“循环播放”</strong>，即可得到一个有呼吸感的动态幻灯片背景。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>四、数据逻辑与金句提炼流</h2>
+      <p>如何快速在 PPT 里突出重点，避免让老板觉得“内容多但没重点”？</p>
+      
+      <div class="pro-con-grid">
+        <div class="pro-box" style="border-left-color: var(--primary);">
+          <h4>📊 动态图表与同步更新</h4>
+          <ul>
+            <li><strong>Power BI 实时联动：</strong>若数据在 Excel 频繁更改，可在 Power BI 中把数据生成动态图表，并将链接嵌入 PPT。在 PPT 中点击“更新链接”，数据图表自动同步更新，省去重新做图表的麻烦。</li>
+            <li><strong>镝数图表动态导出：</strong>利用镝数图表生成极其好看的动态数据图表，导出为 GIF 后拖入 PPT；或导出<strong>透明底 PNG</strong>，无痛适配任何背景色的 PPT 模版。</li>
+          </ul>
+        </div>
+        
+        <div class="con-box" style="border-left-color: var(--secondary);">
+          <h4>✍️ ChatGPT 风格化金句提炼</h4>
+          <p>不要直接让 ChatGPT 写金句。最好的三步提问法：</p>
+          <ol>
+            <li><strong>第一步（先给身份）：</strong>“现在我希望你是鲁迅（或老舍/知名广告人）。如果你理解了，请回复 OK。”</li>
+            <li><strong>第二步（确保风格理解）：</strong>“请简要说一下你的语言写作特征并举个例子。”</li>
+            <li><strong>第三步（生成金句）：</strong>“请根据以下文案，写出 3 句强调新消费市场巨大潜力的鲁迅文风金句，字数控制在 25 字以内，要简短有力。”</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>AIPPT 制作与提效评估分析指南 &copy; 2026</p>
+    <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">基于得到App马馺课程《怎样用AI做PPT》与飞书实操手册总结整理</p>
+  </footer>
+
+</body>
+</html>

@@ -3,518 +3,569 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Miyazawa Workspace</title>
+<title>MIYAZAWA WORKSPACE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* ── Reset & Base ── */
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth;font-size:16px}
+  :root{
+    --bg:       #c9c2a8;
+    --paper:    #ece6cf;
+    --paper-2:  #e3dcc1;
+    --ink:      #15161a;
+    --navy:     #11142a;
+    --blue:     #2a3fb2;
+    --blue-2:   #3858e0;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{background:var(--bg)}
   body{
-    font-family:-apple-system,'Segoe UI','Helvetica Neue',Arial,'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans CJK JP',sans-serif;
-    background:#0a0a0f;
-    color:#e4e4e7;
+    font-family:'IBM Plex Mono','IBM Plex Sans',ui-monospace,monospace;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 800px at var(--mx,50%) var(--my,40%),rgba(255,255,255,.18),transparent 60%),
+      repeating-linear-gradient(0deg,rgba(0,0,0,.025) 0 1px,transparent 1px 3px),
+      var(--bg);
     min-height:100vh;
-    line-height:1.5
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    cursor:default;
   }
+  ::selection{background:var(--blue);color:#fff}
   a{text-decoration:none;color:inherit}
-  img{display:block;max-width:100%}
 
-  /* ── Background Effects ── */
-  .bg-grid{
-    position:fixed;inset:0;
-    background-image:
-      linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
-    background-size:60px 60px;
-    pointer-events:none;z-index:0
-  }
-  .bg-glow{
-    position:fixed;top:-30vh;right:-20vh;width:80vh;height:80vh;
-    background:radial-gradient(circle,rgba(120,50,255,.12),transparent 70%);
-    pointer-events:none;z-index:0
-  }
-  .bg-glow-2{
-    position:fixed;bottom:-30vh;left:-20vh;width:80vh;height:80vh;
-    background:radial-gradient(circle,rgba(255,80,80,.08),transparent 70%);
-    pointer-events:none;z-index:0
+  /* ── CURSOR LIGHT SPOT ── */
+  .spot{
+    position:fixed;inset:0;pointer-events:none;z-index:5;
+    background:radial-gradient(260px 260px at var(--mx,-200px) var(--my,-200px),
+      rgba(255,255,255,.20),rgba(255,255,255,0) 60%);
+    mix-blend-mode:overlay;
   }
 
-  /* ── Header / Logo ── */
-  header{
+  /* ── PAGE FRAME ── */
+  .frame{
+    max-width:1180px;
+    margin:28px auto 64px;
+    padding:14px;
+    background:var(--paper);
+    border:2px solid var(--ink);
+    border-radius:14px;
+    box-shadow:
+      inset 0 0 0 2px var(--paper),
+      inset 0 0 0 4px var(--ink),
+      0 30px 60px rgba(20,18,8,.25);
+    position:relative;
+  }
+  .frame::before,.frame::after{
+    content:"";position:absolute;width:18px;height:18px;
+    border:2px solid var(--ink);background:var(--paper);border-radius:50%;
+  }
+  .frame::before{top:-10px;left:-10px}
+  .frame::after{top:-10px;right:-10px}
+  .corner-bl,.corner-br{
+    position:absolute;width:18px;height:18px;
+    border:2px solid var(--ink);background:var(--paper);border-radius:50%;
+  }
+  .corner-bl{bottom:-10px;left:-10px}
+  .corner-br{bottom:-10px;right:-10px}
+
+  /* ── HERO ── */
+  .hero{
+    background:linear-gradient(180deg,#0d1130 0%,#161a3d 100%);
+    color:#fff;
+    padding:26px 160px 22px 28px;
+    border-radius:6px;
+    position:relative;overflow:hidden;isolation:isolate;
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);
+    pointer-events:none;
+  }
+  .hero::after{
+    content:"";position:absolute;inset:-20%;
+    background:radial-gradient(220px 220px at var(--mx,50%) var(--my,30%),rgba(120,160,255,.18),transparent 70%);
+    pointer-events:none;mix-blend-mode:screen;transition:opacity .3s;
+  }
+  .hero-row{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:24px;
     position:relative;z-index:1;
-    padding:100px 24px 40px;text-align:center
   }
-  .logo-link{
-    display:inline-block;margin:0 auto 24px;
-    text-decoration:none
+  h1.title{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:700;letter-spacing:.06em;margin:0;
+    font-size:clamp(24px,4.8vw,52px);line-height:1;
+    text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 18px rgba(120,150,255,.25);
   }
-  .logo-img{
-    width:80px;height:80px;border-radius:50%;object-fit:cover;
-    display:block;margin:0 auto;
-    box-shadow:0 0 40px rgba(124,58,237,.3);
-    transition:transform .3s ease,box-shadow .3s ease
+  .byline{font-size:clamp(11px,1.4vw,13px);opacity:.85;white-space:nowrap;margin-top:6px}
+  .avatar{
+    position:absolute;
+    top:26px;right:28px;bottom:22px;
+    width:auto;aspect-ratio:1/1;
+    border-radius:6px;object-fit:cover;
+    border:2px solid var(--ink);
+    box-shadow:3px 3px 0 var(--ink);
+    z-index:2;
   }
-  .logo-img:hover{
-    transform:scale(1.05);
-    box-shadow:0 0 60px rgba(124,58,237,.5)
-  }
-  header h1{
-    font-size:40px;font-weight:800;letter-spacing:-1px;
-    background:linear-gradient(135deg,#fff 30%,#a78bfa);
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    background-clip:text
-  }
-  header p{
-    margin-top:12px;font-size:18px;color:#a1a1aa;
-    max-width:480px;margin-left:auto;margin-right:auto
-  }
-  .header-badges{
-    margin-top:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap
-  }
-  .badge{
-    padding:4px 14px;border-radius:999px;font-size:12px;font-weight:600;
-    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
-    color:#a1a1aa
-  }
+  .subtitle{margin:14px 0 6px;font-size:clamp(12px,1.6vw,16px);opacity:.95;letter-spacing:.02em}
+  .meta{font-size:clamp(11px,1.3vw,13px);opacity:.75;letter-spacing:.02em}
 
-  /* ── Search Bar ── */
+  /* ── SEARCH ── */
   .search-wrap{
-    position:relative;z-index:1;
-    max-width:480px;margin:0 auto 48px;padding:0 24px
+    margin-top:14px;position:relative;z-index:1;
   }
   .search-wrap input{
-    width:100%;padding:14px 20px 14px 48px;
-    border-radius:12px;border:1px solid rgba(255,255,255,.08);
-    background:rgba(255,255,255,.04);
-    color:#e4e4e7;font-size:16px;outline:none;
-    transition:all .25s
-  }
-  .search-wrap input::placeholder{color:#52525b}
-  .search-wrap input:focus{
-    border-color:rgba(124,58,237,.4);
-    background:rgba(255,255,255,.06);
-    box-shadow:0 0 20px rgba(124,58,237,.1)
-  }
-  .search-icon{
-    position:absolute;left:38px;top:50%;transform:translateY(-50%);
-    color:#52525b;font-size:18px;pointer-events:none
-  }
-
-  /* ── Section Title ── */
-  .section-title{
-    position:relative;z-index:1;
-    max-width:1100px;margin:0 auto 20px;padding:0 32px;
-    font-size:13px;font-weight:700;letter-spacing:2px;
-    text-transform:uppercase;color:#52525b;
-    text-align:center;width:100%;display:block
-  }
-
-  /* ── Card Grid (flex for last-row centering) ── */
-  .tool-grid{
-    position:relative;z-index:1;
-    max-width:1100px;margin:0 auto 60px;padding:0 24px;
-    display:flex;flex-wrap:wrap;justify-content:center;gap:16px
-  }
-  .tool-grid > .tool-card{
-    width:310px;flex:0 0 310px
-  }
-
-  .tool-card{
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:16px;padding:24px;
-    transition:all .3s cubic-bezier(.4,0,.2,1);
-    cursor:pointer;position:relative;overflow:hidden;
-    text-align:center
-  }
-  .tool-card::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(135deg,rgba(124,58,237,.05),transparent 60%);
-    opacity:0;transition:opacity .3s
-  }
-  .tool-card:hover{
+    width:100%;max-width:420px;
+    padding:9px 14px 9px 38px;
+    font-family:'IBM Plex Mono',monospace;font-size:13px;
     background:rgba(255,255,255,.07);
-    border-color:rgba(255,255,255,.1);
-    transform:translateY(-3px);
-    box-shadow:0 12px 40px rgba(0,0,0,.3)
+    border:1.5px solid rgba(255,255,255,.2);
+    border-radius:4px;
+    color:#fff;outline:none;letter-spacing:.02em;
   }
-  .tool-card:hover::before{opacity:1}
-  .tool-card:active{transform:translateY(-1px)}
+  .search-wrap input::placeholder{color:rgba(255,255,255,.35)}
+  .search-wrap input:focus{border-color:rgba(120,160,255,.5);background:rgba(255,255,255,.1)}
+  .search-icon{
+    position:absolute;left:10px;top:50%;transform:translateY(-50%);
+    color:rgba(255,255,255,.4);font-size:16px;pointer-events:none
+  }
 
-  .card-top{
-    display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;z-index:1
+  /* ── GRID ── */
+  .grid{display:grid;gap:14px;margin-top:14px}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  .grid.four{grid-template-columns:repeat(4,1fr)}
+
+  /* ── PANEL (card) ── */
+  .panel{
+    background:var(--paper-2);
+    border:2px solid var(--ink);
+    border-radius:6px;
+    box-shadow:3px 3px 0 var(--ink);
+    overflow:hidden;
+    transform-style:preserve-3d;
+    transition:transform .25s ease,box-shadow .25s ease;
+    will-change:transform;
+    position:relative;
+    cursor:pointer;
   }
-  .card-icon{
-    width:48px;height:48px;border-radius:12px;
+  .panel:hover{box-shadow:5px 5px 0 var(--ink)}
+  .panel::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:radial-gradient(180px 180px at var(--lx,50%) var(--ly,50%),
+      rgba(255,255,255,.35),rgba(255,255,255,0) 60%);
+    opacity:0;transition:opacity .25s;pointer-events:none;
+    mix-blend-mode:soft-light;
+  }
+  .panel:hover::after{opacity:1}
+
+  .panel .head{
+    background:linear-gradient(180deg,#2236a8,#1a2887);
+    color:#fff;
+    padding:8px 12px;
+    display:flex;align-items:center;gap:10px;
+    font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:13px;
+    border-bottom:2px solid var(--ink);
+    position:relative;
+  }
+  .panel .head::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(255,255,255,.18),transparent 40%);
+    pointer-events:none;
+  }
+  .panel .body{padding:14px 16px}
+
+  /* ── ICON ── */
+  .ico{
+    width:24px;height:24px;flex:0 0 24px;
+    display:inline-flex;align-items:center;justify-content:center;
+    border:1.5px solid var(--ink);background:#fff;
+    border-radius:4px;font-size:14px;line-height:1;
+    box-shadow:1.5px 1.5px 0 var(--ink);
+  }
+  .ico.lg{width:42px;height:42px;flex-basis:42px;font-size:22px;border-radius:6px}
+  .ico.ai {background:#e9eef9}
+  .ico.web{background:#cfe0ff}
+  .ico.git{background:#cfe8d2}
+  .ico.tool{background:#e6e2d2}
+  .ico.local{background:#cfd2da}
+  .ico.design{background:#f6d9c4}
+
+  /* ── CARD (project card inside panel body) ── */
+  .card-grid{display:grid;gap:10px}
+  .card{
+    background:#efe9d2;
+    border:2px solid var(--ink);border-radius:6px;
+    padding:12px 14px;
+    display:flex;align-items:flex-start;gap:12px;
+    box-shadow:3px 3px 0 var(--ink);
+    position:relative;overflow:hidden;
+    transition:box-shadow .2s;
+  }
+  .card:hover{box-shadow:5px 5px 0 var(--ink)}
+  .card::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:radial-gradient(160px 160px at var(--lx,50%) var(--ly,50%),
+      rgba(255,255,255,.35),rgba(255,255,255,0) 60%);
+    opacity:0;transition:opacity .25s;pointer-events:none;mix-blend-mode:soft-light;
+  }
+  .card:hover::after{opacity:1}
+  .card-link{position:absolute;inset:0;z-index:2;border-radius:6px}
+  .card-ico{
+    width:40px;height:40px;flex:0 0 40px;
     display:flex;align-items:center;justify-content:center;
-    font-size:22px;flex-shrink:0;
-    background:rgba(255,255,255,.06)
+    border:2px solid var(--ink);border-radius:6px;font-size:16px;font-weight:700;
+    box-shadow:2px 2px 0 var(--ink);background:#fff;
   }
-  .card-icon.local{background:rgba(59,130,246,.15);color:#60a5fa}
-  .card-icon.web{background:rgba(124,58,237,.15);color:#a78bfa}
-  .card-icon.git{background:rgba(34,197,94,.15);color:#4ade80}
-  .card-icon.ai{background:rgba(239,68,68,.15);color:#f87171}
-  .card-icon.design{background:rgba(251,146,60,.15);color:#fb923c}
-  .card-icon.tool{background:rgba(168,85,247,.15);color:#c084fc}
+  .card-ico.ai   {background:#1a0d2a;color:#c084fc;font-size:18px}
+  .card-ico.web  {background:#0d1f3c;color:#818cf8;font-size:14px}
+  .card-ico.git  {background:#0d2a1a;color:#4ade80;font-size:16px}
+  .card-ico.local{background:#0d2a4a;color:#60a5fa;font-size:16px}
+  .card-ico.design{background:#2a1a0d;color:#fb923c;font-size:16px}
+  .card-ico.tool {background:#11142a;color:#fff;font-size:16px}
 
-  .card-info{min-width:0}
+  .card-info{min-width:0;flex:1}
   .card-title{
-    font-size:17px;font-weight:700;color:#f4f4f5;
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    text-align:center
+    font-size:13px;font-weight:700;color:var(--ink);
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    text-transform:uppercase;letter-spacing:.08em;
   }
   .card-status{
-    font-size:10px;padding:2px 8px;border-radius:999px;
-    font-weight:600;letter-spacing:.3px;white-space:nowrap
+    font-size:9px;padding:2px 7px;font-weight:700;letter-spacing:1px;
+    border:1.5px solid currentColor;white-space:nowrap;text-transform:uppercase;
   }
-  .card-status.online{background:rgba(34,197,94,.15);color:#4ade80}
-  .card-status.local{background:rgba(59,130,246,.15);color:#60a5fa}
-  .card-status.migrating{background:rgba(251,146,60,.15);color:#fb923c}
-
-  .card-desc{
-    margin-top:0;font-size:13px;color:#71717a;line-height:1.5;
-    text-align:center
-  }
-  .card-tags{
-    margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;
-    justify-content:center
-  }
+  .card-status.online  {color:#15803d;background:rgba(21,128,61,.1)}
+  .card-status.local   {color:#1d4ed8;background:rgba(29,78,216,.1)}
+  .card-status.migrating{color:#b45309;background:rgba(180,83,9,.1)}
+  .card-desc{margin-top:5px;font-size:12px;color:#555;line-height:1.55}
+  .card-tags{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap}
   .card-tag{
-    font-size:11px;padding:2px 10px;border-radius:999px;
-    background:rgba(255,255,255,.04);
-    color:#52525b;border:1px solid rgba(255,255,255,.04)
+    font-size:10px;padding:2px 8px;font-weight:700;letter-spacing:.5px;
+    border:1.5px solid var(--ink);color:var(--ink);text-transform:uppercase;
   }
 
-  .card-link{
-    position:absolute;inset:0;z-index:2;
-    border-radius:16px
+  /* ── STRIP (section header) ── */
+  .strip-head{
+    background:linear-gradient(180deg,#2236a8,#1a2887);
+    color:#fff;border:2px solid var(--ink);border-radius:6px 6px 0 0;
+    padding:8px 14px;display:flex;align-items:center;gap:10px;
+    text-transform:uppercase;letter-spacing:.12em;font-weight:600;font-size:13px;
+    border-bottom:0;position:relative;margin-top:14px;
+  }
+  .strip-head::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:linear-gradient(180deg,rgba(255,255,255,.18),transparent 40%);
+    pointer-events:none;
+  }
+  .strip-body{
+    border:2px solid var(--ink);border-top:0;border-radius:0 0 6px 6px;
+    background:var(--paper-2);box-shadow:3px 3px 0 var(--ink);
+    overflow:hidden;padding:14px;
   }
 
-  /* ── Footer ── */
-  footer{
-    position:relative;z-index:1;
-    text-align:center;padding:40px 24px 60px;
-    color:#3f3f46;font-size:13px
+  /* ── STACK BAR ── */
+  .stack-row{
+    display:flex;gap:10px;flex-wrap:wrap;margin-top:14px
   }
-  footer a{color:#71717a;transition:color .2s}
-  footer a:hover{color:#a78bfa}
+  .stack-item{
+    background:#efe9d2;border:2px solid var(--ink);border-radius:6px;
+    padding:10px 16px;box-shadow:3px 3px 0 var(--ink);flex:1;min-width:140px;
+  }
+  .stack-label{font-size:10px;font-weight:700;color:#888;letter-spacing:1.5px;text-transform:uppercase}
+  .stack-value{font-size:13px;font-weight:700;color:var(--ink);margin-top:3px}
 
-  /* ── Responsive ── */
+  /* ── FOOTER ── */
+  .footer{
+    margin-top:14px;
+    background:linear-gradient(180deg,#0d1130 0%,#161a3d 100%);
+    color:#fff;border-radius:6px;
+    padding:12px 18px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:13px;letter-spacing:.04em;position:relative;overflow:hidden;
+  }
+  .footer::before{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);
+    pointer-events:none;
+  }
+  .footer .left{display:flex;align-items:center;gap:10px;position:relative;z-index:1}
+  .footer .right{position:relative;z-index:1;opacity:.7;font-size:12px}
+  .footer a{color:rgba(160,180,255,.8);border-bottom:1px dotted rgba(160,180,255,.4)}
+  .footer a:hover{color:#a0aeff;border-bottom-color:#a0aeff}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:980px){
+    .grid.two,.grid.three,.grid.four{grid-template-columns:1fr 1fr}
+  }
   @media(max-width:640px){
-    html{font-size:15px}
-    header{padding:60px 16px 28px}
-    .logo-img{width:64px;height:64px}
-    header h1{font-size:28px}
-    header p{font-size:15px;margin-top:10px}
-    .header-badges{margin-top:16px;gap:6px}
-    .search-wrap{margin-bottom:32px;padding:0 16px}
-    .search-wrap input{font-size:16px;padding:12px 16px 12px 42px}
-    .search-icon{left:28px}
-    .tool-grid{
-      gap:12px;padding:0 12px;
-      margin-bottom:40px
-    }
-    .tool-grid > .tool-card{
-      width:100%;flex:0 0 100%
-    }
-    .tool-card{padding:18px}
-    .card-icon{width:42px;height:42px;font-size:18px}
-    .card-title{font-size:16px}
-    .card-desc{font-size:13px}
-    .section-title{
-      padding:0 16px;margin-bottom:14px;
-      font-size:12px
-    }
-    .section-title:not(.grid-embedded){
-      margin-left:auto;margin-right:auto
-    }
-    footer{padding:30px 16px 48px}
-  }
-
-  /* ── Small phones ── */
-  @media(max-width:380px){
-    header{padding:40px 12px 24px}
-    header h1{font-size:24px}
-    .tool-grid{padding:0 8px;gap:10px}
-    .tool-card{padding:14px}
-    .card-top{gap:10px}
-    .card-icon{width:36px;height:36px;font-size:16px}
-  }
-
-  /* ── Tablet mid-point ── */
-  @media(min-width:641px) and (max-width:900px){
-    .tool-grid{
-      gap:14px;padding:0 20px
-    }
-    .tool-grid > .tool-card{
-      width:280px;flex:0 0 280px
-    }
-  }
-
-  /* ── Prevent iOS zoom on input ── */
-  @supports(-webkit-touch-callout:none){
-    .search-wrap input{font-size:16px!important}
+    .frame{margin:14px 10px;padding:10px}
+    .hero{padding:20px 18px}
+    .grid.two,.grid.three,.grid.four{grid-template-columns:1fr}
+    .hero-row{flex-direction:column;gap:6px}
+    h1.title{font-size:clamp(20px,7vw,32px)}
+    .footer{flex-direction:column;gap:8px;align-items:flex-start}
+    .avatar{display:none}
   }
 </style>
 </head>
 <body>
+<div class="spot" aria-hidden="true"></div>
 
-<div class="bg-grid"></div>
-<div class="bg-glow"></div>
-<div class="bg-glow-2"></div>
+<main class="frame" id="frame">
+  <span class="corner-bl"></span><span class="corner-br"></span>
 
-<!-- ═══ Header ═══ -->
-<header>
-  <a class="logo-link" href="https://www.miyazawa-workspace.com">
-    <img class="logo-img" src="logo-thumb.jpg" alt="Miyazawa Workspace" width="80" height="80">
-  </a>
-  <h1>Miyazawa Workspace</h1>
-  <p>Personal toolkit &amp; project hub — everything I build and use, in one place.</p>
-  <div class="header-badges">
-    <span class="badge">✦ AI Agent</span>
-    <span class="badge">✦ Design</span>
-    <span class="badge">✦ Dev</span>
-  </div>
-</header>
+  <!-- ── HERO ── -->
+  <section class="hero" data-tilt>
+    <div class="hero-row">
+      <h1 class="title">MIYAZAWA&nbsp;WORKSPACE</h1>
+    </div>
+    <img class="avatar" src="avatar.jpg" alt="Miyazawa-ron">
+    <div class="subtitle">Personal toolkit &amp; project hub — everything I build and use, in one place.</div>
+    <div class="meta">AI Agent · Design · Dev · Cloudflare Pages</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search" placeholder="SEARCH TOOLS & PROJECTS..." oninput="filterCards()">
+    </div>
+  </section>
 
-<!-- ═══ Search ═══ -->
-<div class="search-wrap">
-  <span class="search-icon">⌕</span>
-  <input type="text" id="search" placeholder="Search tools & projects..." oninput="filterCards()">
-</div>
-
-<!-- ═══ Web Projects ═══ -->
-<div class="section-title">🌐 Web Projects</div>
-<div class="tool-grid">
-  <div class="tool-card" data-tags="sunrise design company hinode okinawa">
-    <a class="card-link" href="https://hinodec.com" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon web">日</div>
-      <div class="card-info">
-        <div class="card-title">
-          日の出 株式会社 / SUNRISE
-          <span class="card-status online">Live</span>
+  <!-- ── WEB PROJECTS ── -->
+  <div class="strip-head"><span class="ico web">🌐</span> Web Projects</div>
+  <div class="strip-body">
+    <div class="grid three">
+      <div class="card" data-tags="hermes grok ai agent chat tool" data-tilt>
+        <a class="card-link" href="/hermes-grok.html" target="_blank" rel="noopener"></a>
+        <div class="card-ico ai">⚡</div>
+        <div class="card-info">
+          <div class="card-title">Hermes + Grok <span class="card-status online">Live</span></div>
+          <div class="card-desc">Hermes Agent integrated with Grok — standalone AI tool for multi-model chat and agent workflows.</div>
+          <div class="card-tags"><span class="card-tag">AI</span><span class="card-tag">Hermes</span><span class="card-tag">Grok</span></div>
         </div>
-        <div class="card-desc">Design company &amp; guesthouse business — branding, VI, book design, packaging, and a traditional Okinawan guesthouse.</div>
-        <div class="card-tags">
-          <span class="card-tag">Design</span>
-          <span class="card-tag">民宿</span>
-          <span class="card-tag">Cloudflare</span>
+      </div>
+      <div class="card" data-tags="sunrise design company hinode okinawa" data-tilt>
+        <a class="card-link" href="https://hinodec.com" target="_blank" rel="noopener"></a>
+        <div class="card-ico web">日</div>
+        <div class="card-info">
+          <div class="card-title">日の出 / SUNRISE <span class="card-status online">Live</span></div>
+          <div class="card-desc">Design company &amp; guesthouse — branding, VI, book design, packaging, traditional Okinawan guesthouse.</div>
+          <div class="card-tags"><span class="card-tag">Design</span><span class="card-tag">民宿</span><span class="card-tag">Cloudflare</span></div>
+        </div>
+      </div>
+      <div class="card" data-tags="sakura skylife okinawa" data-tilt>
+        <a class="card-link" href="https://skylife-sakura.com" target="_blank" rel="noopener"></a>
+        <div class="card-ico web">桜</div>
+        <div class="card-info">
+          <div class="card-title">Skylife Sakura <span class="card-status online">Live</span></div>
+          <div class="card-desc">Okinawa-based service website — design portfolio, guesthouse gallery, and business consulting.</div>
+          <div class="card-tags"><span class="card-tag">Okinawa</span><span class="card-tag">Portfolio</span></div>
+        </div>
+      </div>
+      <div class="card" data-tags="jetson agx orin ai server comfyui llm cuda edge" data-tilt>
+        <a class="card-link" href="/agx-orin" target="_blank" rel="noopener"></a>
+        <div class="card-ico ai">◈</div>
+        <div class="card-info">
+          <div class="card-title">AGX Orin AI Server <span class="card-status online">Guide</span></div>
+          <div class="card-desc">Jetson AGX Orin 64GB 全天候 AI 服务器落地方案 — LLM + ComfyUI + Hermes Agent 架构指南。</div>
+          <div class="card-tags"><span class="card-tag">Jetson</span><span class="card-tag">CUDA</span><span class="card-tag">LLM</span><span class="card-tag">Edge AI</span></div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="tool-card" data-tags="sakura skylife okinawa">
-    <a class="card-link" href="https://skylife-sakura.com" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon web">桜</div>
-      <div class="card-info">
-        <div class="card-title">
-          Skylife Sakura
-          <span class="card-status online">Live</span>
-        </div>
-        <div class="card-desc">Okinawa-based service website — design portfolio, guesthouse gallery, and business consulting.</div>
-        <div class="card-tags">
-          <span class="card-tag">Okinawa</span>
-          <span class="card-tag">Portfolio</span>
+  <!-- ── LOCAL SERVICES ── -->
+  <div class="strip-head"><span class="ico local">🖥️</span> Local Services</div>
+  <div class="strip-body">
+    <div class="grid two">
+      <div class="card" data-tags="hermes ai chat webui agent" data-tilt>
+        <a class="card-link" href="http://localhost:8787" target="_blank" rel="noopener"></a>
+        <div class="card-ico local">H</div>
+        <div class="card-info">
+          <div class="card-title">Hermes WebUI <span class="card-status local">Local</span></div>
+          <div class="card-desc">AI chat interface powered by Hermes Agent — multi-model, multi-platform messaging gateway.</div>
+          <div class="card-tags"><span class="card-tag">AI</span><span class="card-tag">Chat</span><span class="card-tag">:8787</span></div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ Local Services ═══ -->
-<div class="section-title" style="margin-top:-4px">🖥️ Local Services</div>
-<div class="tool-grid">
-  <div class="tool-card" data-tags="hermes ai chat webui agent">
-    <a class="card-link" href="http://localhost:8787" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon ai">H</div>
-      <div class="card-info">
-        <div class="card-title">
-          Hermes WebUI
-          <span class="card-status local">Local</span>
-        </div>
-        <div class="card-desc">AI chat interface powered by Hermes Agent — multi-model, multi-platform messaging gateway.</div>
-        <div class="card-tags">
-          <span class="card-tag">AI</span>
-          <span class="card-tag">Chat</span>
-          <span class="card-tag">:8787</span>
+      <div class="card" data-tags="hermes workspace dashboard" data-tilt>
+        <a class="card-link" href="http://localhost:3000" target="_blank" rel="noopener"></a>
+        <div class="card-ico local">W</div>
+        <div class="card-info">
+          <div class="card-title">Hermes Workspace <span class="card-status local">Local</span></div>
+          <div class="card-desc">Full-featured web workspace — chat, file management, project context for AI-assisted workflows.</div>
+          <div class="card-tags"><span class="card-tag">Dashboard</span><span class="card-tag">:3000</span></div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="tool-card" data-tags="hermes workspace dashboard">
-    <a class="card-link" href="http://localhost:3000" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon ai">W</div>
-      <div class="card-info">
-        <div class="card-title">
-          Hermes Workspace
-          <span class="card-status local">Local</span>
+      <div class="card" data-tags="hermes dashboard monitoring" data-tilt>
+        <a class="card-link" href="http://localhost:9119" target="_blank" rel="noopener"></a>
+        <div class="card-ico local">◉</div>
+        <div class="card-info">
+          <div class="card-title">Hermes Dashboard <span class="card-status local">Local</span></div>
+          <div class="card-desc">Agent monitoring dashboard — token usage, session stats, model health at a glance.</div>
+          <div class="card-tags"><span class="card-tag">Monitor</span><span class="card-tag">:9119</span></div>
         </div>
-        <div class="card-desc">Full-featured web workspace — chat, file management, project context for AI-assisted workflows.</div>
-        <div class="card-tags">
-          <span class="card-tag">Dashboard</span>
-          <span class="card-tag">:3000</span>
+      </div>
+      <div class="card" data-tags="open design prototype figma" data-tilt>
+        <a class="card-link" href="http://localhost:52404" target="_blank" rel="noopener"></a>
+        <div class="card-ico design">◈</div>
+        <div class="card-info">
+          <div class="card-title">Open Design <span class="card-status local">Local</span></div>
+          <div class="card-desc">Open-source design platform — prototypes, wireframes, and high-fidelity designs with AI CLI integration.</div>
+          <div class="card-tags"><span class="card-tag">Design</span><span class="card-tag">:52404</span></div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="tool-card" data-tags="hermes dashboard monitoring">
-    <a class="card-link" href="http://localhost:9119" target="_blank"rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon ai">◉</div>
-      <div class="card-info">
-        <div class="card-title">
-          Hermes Dashboard
-          <span class="card-status local">Local</span>
+  <!-- ── DEV & REPOS ── -->
+  <div class="strip-head"><span class="ico git">📦</span> Dev &amp; Repos</div>
+  <div class="strip-body">
+    <div class="grid three">
+      <div class="card" data-tags="github profile miyazawa ron" data-tilt>
+        <a class="card-link" href="https://github.com/Miyazawa-ron" target="_blank" rel="noopener"></a>
+        <div class="card-ico git">⌂</div>
+        <div class="card-info">
+          <div class="card-title">GitHub Profile <span class="card-status online">@Miyazawa-ron</span></div>
+          <div class="card-desc">Personal GitHub account — open-source projects, tools, and collaborative work.</div>
+          <div class="card-tags"><span class="card-tag">GitHub</span><span class="card-tag">OSS</span></div>
         </div>
-        <div class="card-desc">Agent monitoring dashboard — token usage, session stats, model health at a glance.</div>
-        <div class="card-tags">
-          <span class="card-tag">Monitor</span>
-          <span class="card-tag">:9119</span>
+      </div>
+      <div class="card" data-tags="obsidian vault notes knowledge" data-tilt>
+        <a class="card-link" href="https://github.com/Miyazawa-ron/obsidian-vault" target="_blank" rel="noopener"></a>
+        <div class="card-ico git">◇</div>
+        <div class="card-info">
+          <div class="card-title">Obsidian Vault <span class="card-status migrating">Git Sync</span></div>
+          <div class="card-desc">Personal knowledge base — skills, guides, trading strategies, and project documentation.</div>
+          <div class="card-tags"><span class="card-tag">Notes</span><span class="card-tag">Wiki</span></div>
+        </div>
+      </div>
+      <div class="card" data-tags="moss tts nano speech audio" data-tilt>
+        <a class="card-link" href="https://github.com/Miyazawa-ron/MOSS-TTS-Nano" target="_blank" rel="noopener"></a>
+        <div class="card-ico tool">♪</div>
+        <div class="card-info">
+          <div class="card-title">MOSS-TTS-Nano <span class="card-status local">Local</span></div>
+          <div class="card-desc">Lightweight text-to-speech inference — optimized for local deployment on macOS.</div>
+          <div class="card-tags"><span class="card-tag">TTS</span><span class="card-tag">ML</span></div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="tool-card" data-tags="open design prototype figma">
-    <a class="card-link" href="http://localhost:52404" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon design">◈</div>
-      <div class="card-info">
-        <div class="card-title">
-          Open Design
-          <span class="card-status local">Local</span>
-        </div>
-        <div class="card-desc">Open-source design platform — create prototypes, wireframes, and high-fidelity designs with AI CLI integration.</div>
-        <div class="card-tags">
-          <span class="card-tag">Design</span>
-          <span class="card-tag">:52404</span>
+  <!-- ── UTILITIES ── -->
+  <div class="strip-head"><span class="ico tool">🕒</span> Utilities</div>
+  <div class="strip-body">
+    <div class="grid two">
+      <div class="card" data-tags="prompt tool image workflow chatgpt generator poster cover batch" data-tilt>
+        <a class="card-link" href="/prompt-tool/" target="_blank" rel="noopener"></a>
+        <div class="card-ico tool">⌘</div>
+        <div class="card-info">
+          <div class="card-title">Prompt Workflow Terminal <span class="card-status online">Tool</span></div>
+          <div class="card-desc">Controllable prompt generator for poster and cover production — fixed style rules, guided form inputs, batch exploration, and local preset save.</div>
+          <div class="card-tags"><span class="card-tag">Prompt</span><span class="card-tag">Image</span><span class="card-tag">Batch</span></div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ Dev & Repos ═══ -->
-<div class="section-title" style="margin-top:-4px">📦 Dev & Repos</div>
-<div class="tool-grid">
-  <div class="tool-card" data-tags="github profile miyazawa ron">
-    <a class="card-link" href="https://github.com/Miyazawa-ron" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon git">⌂</div>
-      <div class="card-info">
-        <div class="card-title">
-          GitHub Profile
-          <span class="card-status online">@Miyazawa-ron</span>
-        </div>
-        <div class="card-desc">Personal GitHub account — open-source projects, tools, and collaborative work.</div>
-        <div class="card-tags">
-          <span class="card-tag">GitHub</span>
-          <span class="card-tag">OSS</span>
+      <div class="card" data-tags="clock terminal world time tokyo" data-tilt>
+        <a class="card-link" href="world-terminal.html" target="_blank" rel="noopener"></a>
+        <div class="card-ico tool">🕒</div>
+        <div class="card-info">
+          <div class="card-title">World Terminal <span class="card-status online">Tool</span></div>
+          <div class="card-desc">Retro terminal-style world clock with live Tokyo (JST) time. Great for global coordination.</div>
+          <div class="card-tags"><span class="card-tag">Clock</span><span class="card-tag">Terminal</span><span class="card-tag">JST</span></div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="tool-card" data-tags="obsidian vault notes knowledge">
-    <a class="card-link" href="https://github.com/Miyazawa-ron/obsidian-vault" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon git">◇</div>
-      <div class="card-info">
-        <div class="card-title">
-          Obsidian Vault
-          <span class="card-status migrating">Git Sync</span>
-        </div>
-        <div class="card-desc">Personal knowledge base — skills, guides, trading strategies, and project documentation.</div>
-        <div class="card-tags">
-          <span class="card-tag">Notes</span>
-          <span class="card-tag">Wiki</span>
+  <!-- ── REPORTS ── -->
+  <div class="strip-head"><span class="ico ai">📊</span> Reports &amp; Research</div>
+  <div class="strip-body">
+    <div class="grid two">
+      <div class="card" data-tags="aippt ai ppt powerpoint tools workflow analysis report" data-tilt>
+        <a class="card-link" href="/aippt/" target="_blank" rel="noopener"></a>
+        <div class="card-ico ai">⬡</div>
+        <div class="card-info">
+          <div class="card-title">AI × PPT Analysis Report <span class="card-status online">Report</span></div>
+          <div class="card-desc">Full evaluation of AI-powered presentation tools — tool matrix (15+), 10-min rapid workflow, scenario strategies. Based on Feishu official playbook × Dedao course.</div>
+          <div class="card-tags"><span class="card-tag">AIPPT</span><span class="card-tag">AI Tools</span><span class="card-tag">Workflow</span><span class="card-tag">Analysis</span></div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="tool-card" data-tags="moss tts nano speech audio">
-    <a class="card-link" href="https://github.com/Miyazawa-ron/MOSS-TTS-Nano" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon tool">♪</div>
-      <div class="card-info">
-        <div class="card-title">
-          MOSS-TTS-Nano
-          <span class="card-status local">Local</span>
-        </div>
-        <div class="card-desc">Lightweight text-to-speech inference — optimized for local deployment on macOS.</div>
-        <div class="card-tags">
-          <span class="card-tag">TTS</span>
-          <span class="card-tag">ML</span>
-        </div>
-      </div>
-    </div>
+  <!-- ── STACK ── -->
+  <div class="stack-row">
+    <div class="stack-item"><div class="stack-label">Deployed on</div><div class="stack-value">Cloudflare Pages</div></div>
+    <div class="stack-item"><div class="stack-label">Domain</div><div class="stack-value">miyazawa-workspace.com</div></div>
+    <div class="stack-item"><div class="stack-label">Built with</div><div class="stack-value">Pure HTML / CSS / JS</div></div>
+    <div class="stack-item"><div class="stack-label">Design</div><div class="stack-value">Hermes Design System</div></div>
   </div>
-</div>
 
-<!-- ═══ Stack Info ═══ -->
-<div class="section-title" style="margin-top:-20px">⚙️ Stack</div>
-<div class="tool-grid" style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px">
-  <div class="tool-card" style="width:240px;flex:0 0 240px;padding:16px 20px">
-    <div class="card-title" style="font-size:14px">Deployed on</div>
-    <div class="card-desc" style="margin-top:4px">Cloudflare Pages</div>
-  </div>
-  <div class="tool-card" style="width:240px;flex:0 0 240px;padding:16px 20px">
-    <div class="card-title" style="font-size:14px">Domain</div>
-    <div class="card-desc" style="margin-top:4px">miyazawa-workspace.com</div>
-  </div>
-  <div class="tool-card" style="width:240px;flex:0 0 240px;padding:16px 20px">
-    <div class="card-title" style="font-size:14px">Built with</div>
-    <div class="card-desc" style="margin-top:4px">Pure HTML / CSS / JS</div>
-  </div>
-</div>
-
-<!-- ═══ Footer ═══ -->
-<footer>
-  <p>© 2026 <a href="https://github.com/Miyazawa-ron">Miyazawa Workspace</a> — powered by <a href="#">Cloudflare Pages</a></p>
-</footer>
-
-<!-- ═══ Utilities ═══ -->
-<div class="section-title">🕒 Utilities</div>
-<div class="tool-grid">
-  <div class="tool-card" data-tags="clock terminal world time tokyo">
-    <a class="card-link" href="world-terminal.html" target="_blank" rel="noopener"></a>
-    <div class="card-top">
-      <div class="card-icon tool">🕒</div>
-      <div class="card-info">
-        <div class="card-title">
-          World Terminal
-          <span class="card-status online">Tool</span>
-        </div>
-        <div class="card-desc">Retro terminal-style world clock with live Tokyo (JST) time and elegant typography. Great for global coordination.</div>
-        <div class="card-tags">
-          <span class="card-tag">Clock</span>
-          <span class="card-tag">Terminal</span>
-          <span class="card-tag">JST</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="left"><span class="ico tool">🖥️</span><span>Build · Deploy · Never stop learning</span></div>
+    <div class="right">© 2026 <a href="https://github.com/Miyazawa-ron">@Miyazawa-ron</a></div>
+  </footer>
+</main>
 
 <script>
-function filterCards(){
-  const q = document.getElementById('search').value.toLowerCase().trim();
-  document.querySelectorAll('.tool-card').forEach(card => {
-    if(!q) {card.style.display='';return}
-    const tags = (card.dataset.tags||'').toLowerCase();
-    const title = card.querySelector('.card-title')?.textContent?.toLowerCase()||'';
-    const desc = card.querySelector('.card-desc')?.textContent?.toLowerCase()||'';
-    card.style.display = (tags.includes(q)||title.includes(q)||desc.includes(q)) ? '' : 'none';
-  });
-}
-</script>
+  const root = document.documentElement;
+  const tiltEls = document.querySelectorAll('[data-tilt]');
 
+  window.addEventListener('pointermove', (e) => {
+    root.style.setProperty('--mx', e.clientX + 'px');
+    root.style.setProperty('--my', e.clientY + 'px');
+  }, {passive:true});
+
+  function bindTilt(el){
+    let raf = 0, tx = 0, ty = 0, cx = 50, cy = 50;
+    function update(){
+      el.style.transform = `perspective(900px) rotateX(${ty}deg) rotateY(${tx}deg) translateZ(0)`;
+      el.style.setProperty('--lx', cx + '%');
+      el.style.setProperty('--ly', cy + '%');
+      raf = 0;
+    }
+    el.addEventListener('pointermove', (e) => {
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top)  / r.height;
+      tx = (px - .5) *  2 * 4.5;
+      ty = (py - .5) * -2 * 3.5;
+      cx = px * 100; cy = py * 100;
+      if(!raf) raf = requestAnimationFrame(update);
+    });
+    el.addEventListener('pointerleave', () => {
+      tx = 0; ty = 0;
+      if(!raf) raf = requestAnimationFrame(update);
+    });
+  }
+  tiltEls.forEach(bindTilt);
+
+  const frame = document.getElementById('frame');
+  let raf2 = 0;
+  window.addEventListener('pointermove', (e) => {
+    if(raf2) return;
+    raf2 = requestAnimationFrame(() => {
+      const dx = (e.clientX / window.innerWidth  - .5) * 6;
+      const dy = (e.clientY / window.innerHeight - .5) * 4;
+      frame.style.transform = `translate3d(${-dx}px,${-dy}px,0)`;
+      raf2 = 0;
+    });
+  }, {passive:true});
+
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches){
+    tiltEls.forEach(el => el.style.transform = 'none');
+    frame.style.transform = 'none';
+  }
+
+  function filterCards(){
+    const q = document.getElementById('search').value.toLowerCase().trim();
+    document.querySelectorAll('.card').forEach(card => {
+      if(!q){card.style.display='';return}
+      const tags  = (card.dataset.tags||'').toLowerCase();
+      const title = card.querySelector('.card-title')?.textContent?.toLowerCase()||'';
+      const desc  = card.querySelector('.card-desc')?.textContent?.toLowerCase()||'';
+      card.style.display = (tags.includes(q)||title.includes(q)||desc.includes(q)) ? '' : 'none';
+    });
+  }
+</script>
 </body>
 </html>
